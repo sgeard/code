@@ -9,12 +9,12 @@
 !
 ! To find the first an second derivatives of 1/(1-x) at x=0.5
 !
-! 1) Set the auto_var x  call set_val(x,0.5) - the components of x are now {0.5 1 0}
-! 2) Set the auto_var f  f = 1/(1-x) which generates the following call sequence:
-!            sub_n_x        {0.5  1 0} -> {0.5 -1  0}
+! 1) Set the auto_var x  call x%set(0.5) - the components of x are now {0.5 1}
+! 2) Assign the auto_var f  f = 1/(1-x) which generates the following call sequence:
+!            sub_n_x        {0.5  1} -> {0.5 -1}
 !            div_r_x
-!            quotient rule  {0.5 -1 0} -> {2 4 16}
-! 3) So f is now set to {2 4 16}
+!            quotient rule  {0.5 -1} -> {2 4}
+! 3) So f is now set to {2 4}
 !
 !
 ! Usage
@@ -23,9 +23,49 @@
 ! To get the numerical value of the derivative of x**2 at x = 3
 !
 !     type(auto_var) :: x, y
-!     call set_val(x, 3)
+!     call x%set(3)
 !     y = x**2
-!     write(*,'(a,f0.1)') 'Derivative of x**2 at x = 3 is ',y%d
+!     write(*,'(a,f0.1)') 'Derivative of x**2 at x = 3 is ',y%get_derivative()
+!
+! Tested
+! ======
+!     gfortran -o autodiff -cpp -DUTEST autodiff.f90
+!    
+!    ./autodiff
+!    passed :: x**2
+!    passed :: x**3 + x
+!    passed :: 3*x**2
+!    passed :: 3*x**4 + 2*x
+!    passed :: 3*x**2 + 2*x - 5
+!    passed :: (x + 2)*(x + 3)*(x - 1)
+!    passed :: (x + 2)*(3 - x)*(x**2 - 1)
+!    passed :: (x + 2)/(x**2 - 1)
+!    passed :: 1.5d0/(x-1) - 0.5d0/(x+1) [previous function as partial fractions]
+!    passed :: 1/(1-x)
+!    passed :: 4/x
+!    passed :: e**x
+!    passed :: 2**x
+!    passed :: sin(x)
+!    passed :: cos(x)
+!    passed :: sin(1/x)
+!    passed :: sqrt(x)
+!    passed :: ||y||
+!    passed :: sqrt(9+u(2)**2) == ||u||
+!    passed :: _t_ x _x_ (1)
+!    passed :: _t_ x _x_ (2)
+!    passed :: _t_ x _x_ (3)
+!    passed :: x**2 - 2*x*y , Fx
+!    passed :: x**2 - 2*x*y , Fy
+!    passed :: (x-1)*sin(z) + (y+x)*cos(z/2)**2 Fx
+!    passed :: (x-1)*sin(z) + (y+x)*cos(z/2)**2 Fy
+!    passed :: (x-1)*sin(z) + (y+x)*cos(z/2)**2 Fz
+!    passed :: log(4 + x)
+!    passed :: log(4 + x**2)
+!    sub_n_x
+!    div_n_x
+!    quotient rule
+!    passed :: 1/(1-x)
+
 
 module auto_diff
   implicit none
@@ -42,7 +82,7 @@ module auto_diff
   public :: utest
 #endif
   integer :: debug_level = 0
-
+  
 private
 
   type auto_var
@@ -132,6 +172,14 @@ private
 
   interface operator(>)
      module procedure greater_than
+  end interface
+
+  interface operator(<=)
+     module procedure less_equal
+  end interface
+
+  interface operator(>=)
+     module procedure greater_equal
   end interface
 
   interface get_val
@@ -410,6 +458,26 @@ contains
 
     m = x%x > y%x
   end function greater_than
+
+  !----------------------------------------------------------------------------
+  ! Less-equal test
+  function less_equal(x, y) result(m)
+    logical                    :: m
+    type(auto_var), intent(in) :: x
+    type(auto_var), intent(in) :: y
+
+    m = x%x <= y%x
+  end function less_equal
+
+  !----------------------------------------------------------------------------
+  ! Greater-equal test
+  function greater_equal(x, y) result(m)
+    logical                    :: m
+    type(auto_var), intent(in) :: x
+    type(auto_var), intent(in) :: y
+
+    m = x%x >= y%x
+  end function greater_equal
 
   !----------------------------------------------------------------------------
   ! Add
@@ -884,6 +952,19 @@ contains
     f = log(4.0d0 + x**2)
     call testResult('log(4 + x**2)', &
          auto_var(log(4.0d0 + 3**2),2*3/(4.0+3**2)),f)
+         
+    ! The example in the comment at the top with call sequence
+    block
+        type(auto_var) :: f, x
+        debug_level = 1
+        write(*,'(a)') 'Call sequence for 1/(1-x), '
+        call x%set(0.5d0)
+        f = 1/(1-x)
+        call testResult('1/(1-x)', &
+         auto_var(1/(1-0.5d0),1/(1-0.5d0)**2),f)
+    end block
+
+        
     
   contains
     subroutine testResult(str,ref,res)
