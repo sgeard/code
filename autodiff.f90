@@ -1,8 +1,30 @@
 ! Auto differentiation
+! ====================
 
-! Represent a variable by a triple representing its vale, first derivative and second derivative {x 1 0}
-! This is an exact numerical process not an approximation and not an algebraic processor.
+! This is a powerful numerical technique which provides numerically exact vaulues of a first derivative,
+! not an approximation.
+
+! Represent a variable by a pair containing its value and first derivative's value {x, d}, and
+! implementation is by extensive use of operator overloading.
 !
+! For example:
+!    x**2 is represented by {x**2, 2*x} (a specific case of x**n)
+!  sin(x) is represented by {sin(x), cos(x)}
+!
+! The product rule: {x dx}*{y dy} => {xy (x*dy+y*dx)}
+!
+! so x**2*sin(x) => {x**2 2*x}*{sin(x) cos(x)} => {x**2*sin(x) (x**2*cos(x)+2*x*sin(x))}
+
+! The advantage is that complicated algebra calculating first derivatives is avoided without using an approximation
+! - very useful when working with a Jacobian for example.
+! The disadvantage is that the function value is always calculated as well.
+
+!
+! Attribution
+! ===========
+! Read about this somewhere at least 10  years ago and thought it looked interesting. So the idea was someone else's
+! but the implementation is all mine.
+
 !
 ! Example
 ! =======
