@@ -95,7 +95,7 @@ module auto_diff
   public :: auto_var
   public :: set_val, make_var, make_const, get_val, get_der, create
   public :: operator(==), operator(+), operator(-), operator(*), operator(/), operator(**), assignment(=)
-  public :: operator(<), operator(>)
+  public :: operator(<), operator(>), operator(<=), operator(>=)
   public :: cos, sin, tan, sqrt, operator(.dot.), operator(.cross.)
   public :: cosh, sinh, tanh, exp, log
 
