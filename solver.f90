@@ -61,7 +61,7 @@ contains
         do nstp=1,MAXSTP
             call derivs(x,y,dydx)
             
-            yscal = max(abs(y)+abs(h*dydx),small)
+            yscal = abs(y) + abs(h*dydx) + small
             
             if(kmax > 0) then
               if(abs(x-xsav) > abs(dxsav)) then
