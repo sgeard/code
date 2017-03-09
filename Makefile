@@ -1,4 +1,4 @@
-.PHONY: all clean help
+.PHONY: all clean help archive
 
 all: libcode.a libcode.so
 
@@ -27,8 +27,13 @@ libcode.a: $(OBJ)
 libcode.so: $(OBJ)
 	gfortran -o $@ -shared -Wl,-soname,libcode.so $(OBJ)
 
+archive: built.tgz
+
+built.tgz: libcode.so libcode.a
+	tar czvf built.tgz libcode.so libcode.a *.mod
+
 clean:
-	@rm -vf libcode.a libcode.so *.mod *.o
+	@rm -vf libcode.a libcode.so *.mod *.o *~ built.tgz
 	
 help:
 	@echo "SRC = $(SRC)"
