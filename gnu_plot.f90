@@ -110,7 +110,7 @@ contains
             write (u,'(a)') 'set title "'//this%title//'"'
         end if
         write (u,'(a)') 'set term png truecolor'
-        write (u,'(a)') 'set output "'//this%fstem//'png'
+        write (u,'(a)') 'set output "'//this%fstem//'png"'
         write (u,fmt='(a)',advance='no') 'plot "'//data_file//'"'
         close(u)
         call create_plot(fgpl)
@@ -138,7 +138,7 @@ contains
             write (u,'(a)') 'set title "'//this%title//'"'
         end if
         write (u,'(a)') 'set term png truecolor'
-        write (u,'(a)') 'set output "'//this%fstem//'png'
+        write (u,'(a)') 'set output "'//this%fstem//'png"'
         select case(this%plot_type)
         case (plot_type_lines)
             ptype = ' with lines'

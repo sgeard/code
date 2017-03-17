@@ -18,7 +18,7 @@ module solver
     
     integer                      :: kount
     real(8)                      :: dxsav
-    real(8), allocatable, target :: xp(:), yp(:,:)
+    real(8), allocatable, target :: xp_data(:), yp_data(:,:)
     
     pointer :: derivatives_p
     interface
@@ -43,11 +43,10 @@ contains
         integer                  :: kount, nstp
         real(8)                  :: dxsav, h, hdid, hnext, x, xsav
         real(8), allocatable     :: y(:), yscal(:)
+        real(8), allocatable     :: xp(:), yp(:,:)
 
         nvar = size(ystart)
-        if (.not. allocated(xp)) then
-            allocate(xp(KMAX), yp(nvar,KMAX))
-        end if
+        allocate(xp(KMAX), yp(nvar,KMAX))
         allocate(dydx(nvar))
 
         dxsav = (x2-x1)/kmax
@@ -82,12 +81,14 @@ contains
             endif
             if((x-x2)*(x2-x1) >= 0) then
                 ystart = y
-                if(kmax /= 0) then
+                if(kount < kmax) then
                     kount = kount+1
                     xp(kount) = x
                     yp(:,kount) = y
                 endif
-              return
+                xp_data = xp(1:kount)
+                yp_data = yp(:,1:kount)
+                return
             endif
             if(abs(hnext) < hmin) then
                 stop 'stepsize smaller than minimum in odeint'
