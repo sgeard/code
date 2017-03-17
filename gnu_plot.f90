@@ -4,7 +4,7 @@
 
 module gnu_plot
 
-    integer, parameter :: plot_type_points  = 1    
+    integer, parameter :: plot_type_points = 1    
     integer, parameter :: plot_type_lines  = 2
 
     type, abstract :: gplot_t
@@ -29,6 +29,7 @@ module gnu_plot
 
     type, extends(gplot_t) :: line
         integer :: plot_type = plot_type_lines
+        logical :: plot_is_square = .false.
     contains
         procedure :: write => write_gpl_line
     end type line
@@ -147,6 +148,10 @@ contains
         case default
             ptype = ' with linespoints'
         end select
+        if (this%plot_is_square) then
+            write (u,'(a)') 'set size square'
+        end if
+        
         ! Apply column selector if given
         if (present(columns)) then
             col_sel = 'using x:y'
