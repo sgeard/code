@@ -1,6 +1,40 @@
 ! Basic Fortran interface for gnuplot
+! ===================================
 !
-! No tests here but it has been tested in anger!
+! This module implements various plotting options for gnuplot.
+!
+! Currently all data are plotted from a file.
+!
+! The output is a .png file.
+!
+! Examples
+! ========
+
+! Lines
+! -----
+
+!     Declare an instance of the line type
+!     use gnu_plot
+!     type(line) :: gpl
+!
+!     Set the output file name
+!     gpl%gfile = 'assign3.gpl'
+      
+!     Set the title and axes labels
+!     gpl%xlabel = '"x"'
+!     gpl%ylabel = '"y" rotate by 360'
+!     gpl%title = 'Temperature Profile at time t'
+      
+!     Set the position of the legend
+!     gpl%pos = 'bottom left vertical inside'
+
+!     Create plots from data_files
+!     call gpl%append(data_file1,force_create=.true.)
+!     call gpl%append(data_file2)
+
+!     Run the command, this will create the .png file
+!     call  gpl%create()
+
 
 module gnu_plot
 
@@ -35,6 +69,7 @@ module gnu_plot
     contains
         procedure :: write => write_gpl_line
         procedure :: append => append_gpl_line
+        procedure :: create => create_gpl_line
     end type line
 
 contains
@@ -231,5 +266,10 @@ contains
         close(u)
 
     end subroutine append_gpl_line
+
+    subroutine create_gpl_line(this)
+        class(line), intent(in) :: this
+        call create_plot(this%gfile)
+    end subroutine create_gpl_line
 
 end module gnu_plot
