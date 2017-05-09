@@ -10,4 +10,6 @@ helper module for Fortran code wanting to create gnuplot plots
 ##Makefile
 for building
 ###built.tgz
-archive library, shared library and mod files
+archive library, shared library and mod files - gfortran
+###built-intel.tgz
+archive library, shared library and mod files - Intel
