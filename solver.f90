@@ -23,7 +23,6 @@ module solver
     pointer :: derivatives_p
     interface
         subroutine derivatives_p(t, y, dydx)
-            import
             real(8), intent(in)  :: t
             real(8), intent(in)  :: y(:)
             real(8), intent(out) :: dydx(:)
@@ -137,6 +136,8 @@ contains
         end do
     end subroutine rkqs
 !
+!   Cash-Karp - an adaptive Runge-Kutta method
+!   see https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
     subroutine rkck(y,dydx,x,h,yout,yerr,derivs)
 
         real(8), intent(in)               :: h, x, dydx(:), y(:)
