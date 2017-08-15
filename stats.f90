@@ -186,7 +186,7 @@ contains
         mv = mv/n
         mean = mv(1)
         if (present(standard_deviation)) then
-            standard_deviation = sqrt(mv(2) - mv(1)**2)
+            standard_deviation = sqrt(abs(mv(2) - mv(1)**2))  ! Rounding could make it < 0 so use abs to be safe
             if (present(skewness)) then
                 skewness = (mv(3) - mean*(3*standard_deviation**2 + mean**2))/standard_deviation**3
             end if
