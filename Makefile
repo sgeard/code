@@ -6,18 +6,31 @@ SRC := $(wildcard  *.f90)
 OBJ := ${SRC:%.f90=%.o}
 
 ifdef intel
-F90 := ifort
-F90_OPTS := -c -fPIC -fpp -O3
-LINK_OPTS := -static-intel
-ARCH_NAME := build-intel.tgz
+    F90 := ifort
+    F90_OPTS := -c -fPIC -fpp -DUSE_AUTODIFF
+    ifdef release
+        F90_OPTS += -O3
+    else
+        F90_OPTS += -D_DEBUG -g -check bounds
+    endif
+    LINK_OPTS := -static-intel
+    ARCH_NAME := build-intel.tgz
 else
-F90 := gfortran
-F90_OPTS := -c -fPIC -cpp -O3
-LINK_OPTS :=
-ARCH_NAME := build.tgz
+    F90 := gfortran
+    F90_OPTS := -c -fPIC -cpp -std=f2008 -fimplicit-none -DUSE_AUTODIFF -ffree-line-length-200
+    ifdef release
+        F90_OPTS += -O3
+    else
+        F90_OPTS += -D_DEBUG -Wall -ggdb -fbounds-check -ffpe-trap=denormal,invalid
+    endif
+    LINK_OPTS :=
+    ARCH_NAME := build.tgz
 endif
 
 autodiff.o: autodiff.f90
+	$(F90) $(F90_OPTS) $< -o $@
+
+stats.o: stats.f90
 	$(F90) $(F90_OPTS) $< -o $@
 
 vector_analysis.o: autodiff.o vector_analysis.f90
@@ -33,7 +46,7 @@ libcode.a: $(OBJ)
 	ar r $@ $(OBJ)
 
 libcode.so: $(OBJ)
-	$(F90) -o $@ $(LINK_OPTS) -shared -Wl,-soname,libcode.so $(OBJ)
+	$(F90) -o $@ $(OBJ) $(LINK_OPTS) -shared
 
 archive: $(ARCH_NAME)
 

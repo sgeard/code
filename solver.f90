@@ -20,13 +20,18 @@ module solver
     real(8)                      :: dxsav
     real(8), allocatable, target :: xp_data(:), yp_data(:,:)
     
-    pointer :: derivatives_p
     interface
         subroutine derivatives_p(t, y, dydx)
             real(8), intent(in)  :: t
             real(8), intent(in)  :: y(:)
             real(8), intent(out) :: dydx(:)
         end subroutine derivatives_p
+        
+        function f_p(t,x) result(dxdt)
+            real(8), intent(in)             :: t
+            real(8), intent(in), contiguous :: x(:,:)
+            real(8)                         :: dxdt(size(x,1),size(x,2))
+        end function f_p
     end interface
     
 contains
@@ -183,6 +188,20 @@ contains
 
         return
     end subroutine rkck
+
+    ! Explicit 4th order Runge-Kutta method
+    function rk4(h,t,x,fp) result(xout)
+        real(8), intent(in)             :: h, t
+        real(8), intent(in), contiguous :: x(:,:)
+        real(8)                         :: xout(size(x,1),size(x,2))
+        real(8), dimension(size(x,1),size(x,2)) :: k1, k2, k3, k4
+        procedure(f_p), pointer :: fp
+        k1   = h*fp(t    ,x     )
+        k2   = h*fp(t+h/2,x+k1/2)
+        k3   = h*fp(t+h/2,x+k2/2)
+        k4   = h*fp(t+h  ,x+k3  )
+        xout = x + k1/6 + k2/3 + k3/3 + k4/6
+    end function rk4
     
     subroutine four1(data,nn,isign)
         integer, intent(in) :: isign, nn

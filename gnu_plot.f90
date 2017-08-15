@@ -233,9 +233,11 @@ contains
         if (.not. create_new .and. present(force_create)) then
             create_new = force_create
         end if
-        if (force_create) then
-            call this%write(data_file, columns)
-            return
+        if (present(force_create)) then
+            if (force_create) then
+                call this%write(data_file, columns)
+                return
+            end if
         end if
         open(newunit=u,file=this%gfile,status='old',position='append',action='readwrite')
         backspace(u)
