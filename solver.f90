@@ -1,4 +1,4 @@
-! Ode solver optionally using auto-differentiation
+! Ode solver
 !
 ! Adapted from Numerical Recipes 77
 
