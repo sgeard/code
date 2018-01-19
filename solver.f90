@@ -3,11 +3,6 @@
 ! Adapted from Numerical Recipes 77
 
 module solver
-
-#ifdef USE_AUTODIFF
-    use vector_analysis
-#endif
-
     
     implicit none
         
