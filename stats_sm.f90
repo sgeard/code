@@ -263,7 +263,7 @@ contains
 
                 ! ---   and if they are not, try again   ---
         
-                if (r < 1 .and. r /= 0) exit uniform_square
+                if (r < 1 .and. r > 0) exit uniform_square
 
             end do uniform_square
 

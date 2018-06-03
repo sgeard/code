@@ -3,7 +3,15 @@
 ! Adapted from Numerical Recipes 77
 
 submodule (solver) solver_sm
-    
+        
+    integer, parameter :: MAXSTP = 1000000
+    integer, parameter :: KMAX = 10000
+    real(8), parameter :: pi = 4*atan(1.0d0)
+    real(8), parameter :: two_pi = 2*pi
+    integer                      :: kount
+    real(8)                      :: dxsav
+    real(8), allocatable, target :: xp_data(:), yp_data(:,:)
+   
 contains
 !
     module subroutine odeint(ystart,x1,x2,eps,h1,hmin,nok,nbad,derivs)
@@ -73,7 +81,7 @@ contains
         return
     end subroutine odeint
 !
-    module subroutine rkqs(y,dydx,n,x,htry,eps,yscal,hdid,hnext,derivs)
+    module subroutine rkqs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs)
         integer, intent(in)      :: n
         real(8), intent(in)      :: eps, htry, dydx(n), yscal(n)
         real(8), intent(out)     :: hnext, hdid, y(n)
@@ -89,13 +97,16 @@ contains
       
         h = htry
         do
-            call rkck(y,dydx,x,h,ytemp,yerr,derivs)
+            call rk_cash_karp(y,dydx,x,h,ytemp,yerr,derivs)
             errmax = maxval(abs(yerr/yscal))/eps
             if(errmax > 1) then
                 htemp = SAFETY*h*(errmax**PSHRNK)
                 h = sign(max(abs(htemp),0.1d0*abs(h)),h)
+                if (abs(h) < epsilon(h)) then
+                    stop 'stepsize underflow in rkqs'
+                end if
                 xnew = x + h
-                if(xnew == x) stop 'stepsize underflow in rkqs'
+                !!if(xnew == x) stop 'stepsize underflow in rkqs'
                 cycle
             else
                 if(errmax > ERRCON) then
@@ -113,7 +124,7 @@ contains
 !
 !   Cash-Karp - an adaptive Runge-Kutta method
 !   see https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    module subroutine rkck(y,dydx,x,h,yout,yerr,derivs)
+    module subroutine rk_cash_karp(y, dydx, x, h, yout, yerr, derivs)
 
         real(8), intent(in)               :: h, x, dydx(:), y(:)
         real(8), allocatable, intent(out) :: yerr(:), yout(:)
@@ -157,10 +168,10 @@ contains
         yerr=h*(DC1*dydx+DC3*ak3+DC4*ak4+DC5*ak5+DC6*ak6)
 
         return
-    end subroutine rkck
+    end subroutine rk_cash_karp
 
     ! Explicit 4th order Runge-Kutta method
-    module function rk4(h,t,x,fp) result(xout)
+    module function rk_exp4(h,t,x,fp) result(xout)
         real(8), intent(in)             :: h, t
         real(8), intent(in), contiguous :: x(:,:)
         procedure(f_p), pointer :: fp
@@ -171,7 +182,7 @@ contains
         k3   = h*fp(t+h/2,x+k2/2)
         k4   = h*fp(t+h  ,x+k3  )
         xout = x + k1/6 + k2/3 + k3/3 + k4/6
-    end function rk4
+    end function rk_exp4
     
     module subroutine four1(data,nn,isign)
         integer, intent(in) :: isign, nn

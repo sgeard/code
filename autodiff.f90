@@ -22,7 +22,7 @@
 !
 ! Attribution
 ! ===========
-! Read about this somewhere at least 10  years ago and thought it looked interesting. So the idea was someone else's
+! Read about this somewhere at least 10 years ago and thought it looked interesting. So the idea was someone else's
 ! but the implementation is all mine.
 
 !

@@ -131,7 +131,7 @@ contains
         integer, optional, intent(in) :: columns(2)
         
         integer                       :: u
-        character(len=:), allocatable :: fgpl, ptype
+        character(len=:), allocatable :: ptype
         character(len=20)             :: col_sel
         character(len=:), allocatable :: plot_command
         character(len=:), allocatable :: fstem

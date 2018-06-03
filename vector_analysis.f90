@@ -7,117 +7,52 @@ module vector_analysis
     implicit none
     
     abstract interface
-        function f(x, y)
+        function f(p)
             import
             type(auto_var) :: f
-            type(auto_var), intent(in) :: x, y
+            type(auto_var), intent(in) :: p(3)
         end function f
     end interface
     
-contains
+    interface
+        module function grad(p, phi) result(r)
+            real(8) :: r(3)
+            real(8), intent(in) :: p(3)
+            procedure(f)        :: phi
+        end function grad
+      
+        module function div(p, phi)
+            real(8) :: div
+            real(8), intent(in) :: p(3)
+            procedure(f)        :: phi
+        end function div
 
-    ! Calculate the gradient
-    function grad(x, y, phi)
-        real(8) :: grad(2)
-        real(8), intent(in) :: x, y
-        procedure(f)        :: phi
-        type(auto_var) :: xa, ya, ra
+        !module function del_squared(p, phi)
+        !    real(8) :: del_squared
+        !    real(8), intent(in) :: p(3)
+        !    procedure(f)        :: phi
+        !end function del_squared
+        !
+        !module function curl(p, phi)
+        !    real(8) :: curl
+        !    real(8), intent(in) :: p(3)
+        !    procedure(f)        :: phi
+        !end function curl
         
-        ! x-component varies, y-component constant
-        call xa%set(x)
-        call ya%set_constant(y)
-        ra = phi(xa, ya)
-        grad(1) = ra%get_derivative()
+        module function evaluate(p, phi)
+            real(8) :: evaluate
+            real(8), intent(in) :: p(3)
+            procedure(f)        :: phi
+        end function evaluate
 
-        ! y-component varies, x-component constant
-        call xa%set_constant(x)
-        call ya%set(y)
-        ra = phi(xa, ya)
-        grad(2) = ra%get_derivative()
-        
-    end function grad
-
-    ! Calculate the divergence
-    function div(x, y, phi)
-        real(8) :: div
-        real(8) :: grad(2)
-        real(8), intent(in) :: x, y
-        procedure(f)        :: phi
-        type(auto_var) :: xa, ya, ra
-        
-        ! x-component varies, y-component constant
-        call xa%set(x)
-        call ya%set_constant(y)
-        ra = phi(xa, ya)
-        grad(1) = ra%get_derivative()
-
-        ! y-component varies, x-component constant
-        call xa%set_constant(x)
-        call ya%set(y)
-        ra = phi(xa, ya)
-        grad(2) = ra%get_derivative()
-        
-        div = sum(grad)
-    end function div
-
-    ! Calculate the del_squared (== div(grad))
-    function del_squared(x, y, phi)
-        real(8) :: del_squared
-        real(8) :: grad(2)
-        real(8), intent(in) :: x, y
-        procedure(f)        :: phi
-        type(auto_var) :: xa, ya, ra
-        
-        ! x-component varies, y-component constant
-        call xa%set(x)
-        call ya%set_constant(y)
-        ra = phi(xa, ya)
-        grad(1) = ra%get_derivative()
-
-        ! y-component varies, x-component constant
-        call xa%set_constant(x)
-        call ya%set(y)
-        ra = phi(xa, ya)
-        grad(2) = ra%get_derivative()
-        
-        del_squared = sum(grad**2)
-    end function del_squared
-
-    ! This is actually the z-component of curl
-    function curl(x, y, phi)
-        real(8) :: curl
-        real(8) :: grad(2)
-        real(8), intent(in) :: x, y
-        procedure(f)        :: phi
-        type(auto_var) :: xa, ya, ra
-        
-        ! x-component varies, y-component constant
-        call xa%set(x)
-        call ya%set_constant(y)
-        ra = phi(xa, ya)
-        grad(1) = ra%get_derivative()
-
-        ! y-component varies, x-component constant
-        call xa%set_constant(x)
-        call ya%set(y)
-        ra = phi(xa, ya)
-        grad(2) = ra%get_derivative()
-        
-        curl = grad(1) - grad(2)
-    end function curl
-
-    ! Evaluate the given function
-    function evaluate(x, y, phi)
-        real(8) :: evaluate
-        real(8), intent(in) :: x, y
-        procedure(f)        :: phi
-        type(auto_var) :: xa, ya, ra
-        
-        ! Make parameters constant - no derivatives
-        call xa%set_constant(x)
-        call ya%set_constant(y)
-        ra = phi(xa, ya)
-        evaluate = ra%get_value()
-    end function evaluate
-
+    end interface  
+         
+    ! Access the cross product as an operator so that the code reads better
+    interface operator(.cross.)
+        module pure function cross(a, b) result(r)
+            real(8), intent(in) :: a(3), b(3)
+            real(8) :: r(3)
+        end function cross
+    end interface
+       
 end module vector_analysis
