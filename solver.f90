@@ -8,21 +8,35 @@ module solver
 
     private
 
-    public rk_exp4, rk_cash_karp, f_p, derivatives_p
+    public rk_exp4, rk_exp38, rk_cash_karp
+    public f_p, derivatives_p, solver_p
     
-     
-    interface
+    abstract interface
+         
+        function f_p(t,x) result(dxdt)
+            real(8), intent(in)             :: t
+            real(8), intent(in), contiguous :: x(:,:)
+            real(8)                         :: dxdt(size(x,1),size(x,2))
+        end function f_p
+        
         subroutine derivatives_p(t, y, dydx)
             real(8), intent(in)  :: t
             real(8), intent(in)  :: y(:)
             real(8), intent(out) :: dydx(:)
         end subroutine derivatives_p
         
-        function f_p(t,x) result(dxdt)
-            real(8), intent(in)             :: t
+       function solver_p(h,t,x,fp) result(xout)
+            import
+            real(8), intent(in)             :: h, t
             real(8), intent(in), contiguous :: x(:,:)
-            real(8)                         :: dxdt(size(x,1),size(x,2))
-        end function f_p
+            procedure(f_p), pointer         :: fp
+            real(8)                         :: xout(size(x,1),size(x,2))
+        end function solver_p
+        
+    end interface
+    
+    
+    interface
         
         module subroutine odeint(ystart,x1,x2,eps,h1,hmin,nok,nbad,derivs)
             real(8), intent(inout)   :: ystart(:)
@@ -51,6 +65,13 @@ module solver
             procedure(f_p), pointer :: fp
             real(8)                         :: xout(size(x,1),size(x,2))
         end function rk_exp4
+        
+        module function rk_exp38(h,t,x,fp) result(xout)
+            real(8), intent(in)             :: h, t
+            real(8), intent(in), contiguous :: x(:,:)
+            procedure(f_p), pointer :: fp
+            real(8)                         :: xout(size(x,1),size(x,2))
+        end function rk_exp38
         
         module subroutine four1(data,nn,isign)
             integer, intent(in) :: isign, nn

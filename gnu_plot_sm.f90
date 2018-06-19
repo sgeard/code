@@ -81,6 +81,9 @@ contains
         character(len=:), allocatable  :: fstem
         
         open (newunit=u,file=this%gfile,access='sequential',status='replace')
+        if (this%ignore_first_row) then
+            write (u,'(a)') 'set key autotitle columnhead'
+        end if
         write (u,'(a)') 'set xlabel "'//this%xlabel//'"'
         write (u,'(a)') 'set ylabel "Frequency"'
         write (u,'(a)') 'set title "'//this%title//'"'
@@ -107,11 +110,14 @@ contains
         character(len=:), allocatable :: fstem
        
         open (newunit=u,file=this%gfile,access='sequential',status='replace')
+        if (this%ignore_first_row) then
+            write (u,'(a)') 'set key autotitle columnhead'
+        end if
         if (allocated(this%xlabel)) then
-            write (u,'(a)') 'set xlabel "'//this%xlabel//'"'
+            write (u,'(a)') 'set xlabel '//this%xlabel
         end if
         if (allocated(this%ylabel)) then
-            write (u,'(a)') 'set ylabel "'//this%ylabel//'"'
+            write (u,'(a)') 'set ylabel '//this%ylabel
         end if
         if (allocated(this%title)) then
             write (u,'(a)') 'set title "'//this%title//'"'
@@ -137,6 +143,9 @@ contains
         character(len=:), allocatable :: fstem
         
         open (newunit=u,file=this%gfile,access='sequential',status='replace')
+        if (this%ignore_first_row) then
+            write (u,'(a)') 'set key autotitle columnhead'
+        end if
         if (allocated(this%xlabel)) then
             write (u,'(a)') 'set xlabel '//this%xlabel
         end if

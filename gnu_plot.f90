@@ -46,17 +46,16 @@ module gnu_plot
         character(len=:), allocatable :: title
         character(len=:), allocatable :: xlabel
         character(len=:), allocatable :: ylabel
+        logical                       :: ignore_first_row = .false.
     contains
     end type gplot_t
     
     type, extends(gplot_t) :: histogram
-    
     contains
         procedure :: write => write_gpl_hist    
     end type histogram
     
-    type, extends(gplot_t) :: scatter
-    
+    type, extends(gplot_t) :: scatter   
     contains
         procedure :: write => write_gpl_scat   
     end type scatter

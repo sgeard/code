@@ -106,7 +106,6 @@ contains
                     stop 'stepsize underflow in rkqs'
                 end if
                 xnew = x + h
-                !!if(xnew == x) stop 'stepsize underflow in rkqs'
                 cycle
             else
                 if(errmax > ERRCON) then
@@ -183,6 +182,20 @@ contains
         k4   = h*fp(t+h  ,x+k3  )
         xout = x + k1/6 + k2/3 + k3/3 + k4/6
     end function rk_exp4
+
+    ! Explicit 4th order Runge-Kutta method - the 3/8 rule
+    module function rk_exp38(h,t,x,fp) result(xout)
+        real(8), intent(in)             :: h, t
+        real(8), intent(in), contiguous :: x(:,:)
+        procedure(f_p), pointer :: fp
+        real(8)                         :: xout(size(x,1),size(x,2))
+        real(8), dimension(size(x,1),size(x,2)) :: k1, k2, k3, k4
+        k1   = h*fp(t      , x     )
+        k2   = h*fp(t+h/3  , x + k1/3)
+        k3   = h*fp(t+2*h/3, x - k1/3 + k2)
+        k4   = h*fp(t+h    , x + k1 - k2 + k3  )
+        xout = x + k1/8 + 3*k2/8 + 3*k3/8 + k4/8
+    end function rk_exp38
     
     module subroutine four1(data,nn,isign)
         integer, intent(in) :: isign, nn
