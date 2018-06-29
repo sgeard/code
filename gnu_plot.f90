@@ -47,6 +47,7 @@ module gnu_plot
         character(len=:), allocatable :: xlabel
         character(len=:), allocatable :: ylabel
         logical                       :: ignore_first_row = .false.
+        logical                       :: show_title = .true.
     contains
     end type gplot_t
     

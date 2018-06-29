@@ -127,7 +127,7 @@ contains
         logical, intent(in), optional  :: mask(:)
         real(8), intent(out), optional :: standard_deviation
         real(8), intent(out), optional :: skewness
-        real(8) :: mv(3)
+        real(8) :: mv(3), ssdev
         integer :: i, n
         
         mv = 0
@@ -139,7 +139,7 @@ contains
             do i=1,size(col)
                 if (mask(i)) then
                     mv(1) = mv(1) + col(i)
-                    if (present(standard_deviation)) then
+                    if (present(standard_deviation) .or. present(skewness)) then
                         mv(2) = mv(2) + col(i)**2
                         if (present(skewness)) then
                             mv(3)= mv(3)+ col(i)**3
@@ -154,7 +154,7 @@ contains
             !$omp parallel do shared(col) reduction(+:mv)
             do i=1,n
                 mv(1) = mv(1) + col(i)
-                if (present(standard_deviation)) then
+                if (present(standard_deviation) .or. present(skewness)) then
                     mv(2) = mv(2) + col(i)**2
                     if (present(skewness)) then
                         mv(3)= mv(3)+ col(i)**3
@@ -168,10 +168,13 @@ contains
         ! Mean and standard deviation
         mv = mv/n
         mean = mv(1)
-        if (present(standard_deviation)) then
-            standard_deviation = sqrt(abs(mv(2) - mv(1)**2))  ! Rounding could make it < 0 so use abs to be safe
+        if (present(standard_deviation) .or. present(skewness)) then
+            ssdev = sqrt(abs(mv(2) - mv(1)**2))  ! Rounding could make it < 0 so use abs to be safe
             if (present(skewness)) then
-                skewness = (mv(3) - mean*(3*standard_deviation**2 + mean**2))/standard_deviation**3
+                skewness = (mv(3) - mean*(3*ssdev**2 + mean**2))/ssdev**3
+            end if
+            if (present(standard_deviation)) then
+                standard_deviation = ssdev
             end if
         end if
             

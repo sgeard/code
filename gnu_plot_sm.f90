@@ -126,6 +126,9 @@ contains
         fstem = this%gfile(1:len(this%gfile)-3)
         write (u,'(a)') 'set output "'//fstem//'png"'
         write (u,fmt='(a)',advance='no') 'plot "'//data_file//'"'
+        if (.not. this%show_title) then
+            write (u,fmt='(a)',advance='no') ' notitle'
+        end if
         close(u)
         call create_plot(this%gfile)
     end subroutine write_gpl_scat

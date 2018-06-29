@@ -1,7 +1,12 @@
 .PHONY: all clean help archive test
 
+ifdef release
+    OBJ_DIR_SUFF := _release
+else
+    OBJ_DIR_SUFF := _debug
+endif
 ifdef intel
-    ODIR := obj_intel
+    ODIR := obj_intel$(OBJ_DIR_SUFF)
     F90 := ifort
     F90_OPTS := -fPIC -fpp -DUSE_AUTODIFF -module $(ODIR)
     ifdef release
@@ -12,7 +17,7 @@ ifdef intel
     LINK_OPTS := -static-intel
     ARCH_NAME := build-intel.tgz
 else
-    ODIR := obj_gfortran
+    ODIR := obj_gfortran$(OBJ_DIR_SUFF)
     F90 := /usr/local/bin/gfortran
     F90_OPTS := -c -fPIC -cpp -std=f2008 -fimplicit-none -DUSE_AUTODIFF -ffree-line-length-200 -Wall -Wextra -J$(ODIR)
     ifdef release
