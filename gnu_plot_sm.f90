@@ -93,6 +93,9 @@ contains
         write (u,'(a)') 'set output "'//fstem//'png'
         write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
         write (u,'(a)') 'set xtics rotate 90'
+        if (.not. this%show_title) then
+            write (u,fmt='(a)',advance='no') ' notitle'
+        end if
         if (present(ymax)) then
             write(u,'(a,f0.2,a)') 'set yrange [0:',ymax,']'
         end if
@@ -157,6 +160,9 @@ contains
         end if
         if (allocated(this%title)) then
             write (u,'(a)') 'set title "'//this%title//'"'
+        end if
+        if (.not. this%show_title) then
+            write (u,fmt='(a)',advance='no') ' notitle'
         end if
         if (allocated(this%pos)) then
             write (u,'(a)') 'set key '//this%pos

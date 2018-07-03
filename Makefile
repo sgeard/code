@@ -12,7 +12,7 @@ ifdef intel
     ifdef release
         F90_OPTS += -O3
     else
-        F90_OPTS += -D_DEBUG -g -check bounds
+        F90_OPTS += -D_DEBUG -g -check bounds -warn all
     endif
     LINK_OPTS := -static-intel
     ARCH_NAME := build-intel.tgz

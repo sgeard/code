@@ -8,7 +8,7 @@ module solver
 
     private
 
-    public rk_exp4, rk_exp38, rk_cash_karp
+    public rk_exp4, rk_exp38, rk_cash_karp, rk_get_error
     public f_p, derivatives_p, solver_p
     
     abstract interface
@@ -41,7 +41,7 @@ module solver
         module subroutine odeint(ystart,x1,x2,eps,h1,hmin,nok,nbad,derivs)
             real(8), intent(inout)   :: ystart(:)
             real(8), intent(in)      :: x1, x2, eps, h1, hmin
-            integer                  :: nbad, nok, nvar
+            integer                  :: nbad, nok
             procedure(derivatives_p) :: derivs
         end subroutine odeint
 
@@ -53,11 +53,22 @@ module solver
             procedure(derivatives_p) :: derivs
         end subroutine rkqs
         
-        module subroutine rk_cash_karp(y,dydx,x,h,yout,yerr,derivs)
-            real(8), intent(in)               :: h, x, dydx(:), y(:)
+        module subroutine rk_cash_karp_original(y,dydx,t,h,yout,yerr,derivs)
+            real(8), intent(in)               :: h, t, dydx(:), y(:)
             real(8), allocatable, intent(out) :: yerr(:), yout(:)
             procedure(derivatives_p)          :: derivs
-        end subroutine rk_cash_karp
+        end subroutine rk_cash_karp_original
+        
+        module function rk_cash_karp(h,t,x,fp) result(xout)
+            real(8), intent(in)             :: h, t
+            real(8), intent(in), contiguous :: x(:,:)
+            procedure(f_p), pointer :: fp
+            real(8)                         :: xout(size(x))
+        end function rk_cash_karp
+
+        module function rk_get_error() result(r)
+            real(8), dimension(:,:), pointer :: r
+        end function rk_get_error
         
         module function rk_exp4(h,t,x,fp) result(xout)
             real(8), intent(in)             :: h, t

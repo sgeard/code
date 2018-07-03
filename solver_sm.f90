@@ -3,7 +3,7 @@
 ! Adapted from Numerical Recipes 77
 
 submodule (solver) solver_sm
-        
+    
     integer, parameter :: MAXSTP = 1000000
     integer, parameter :: KMAX = 10000
     real(8), parameter :: pi = 4*atan(1.0d0)
@@ -11,164 +11,156 @@ submodule (solver) solver_sm
     integer                      :: kount
     real(8)                      :: dxsav
     real(8), allocatable, target :: xp_data(:), yp_data(:,:)
+    real(8), allocatable, target :: x_error(:,:)
    
 contains
 !
-    module subroutine odeint(ystart,x1,x2,eps,h1,hmin,nok,nbad,derivs)
-        real(8), intent(inout)   :: ystart(:)
-        real(8), intent(in)      :: x1, x2, eps, h1, hmin
-        integer                  :: nbad, nok, nvar
-        procedure(derivatives_p) :: derivs
-        real(8), allocatable     :: dydx(:)
-
-        real(8), parameter       :: small = 1.0d-30
-        integer                  :: kount, nstp
-        real(8)                  :: dxsav, h, hdid, hnext, x, xsav
-        real(8), allocatable     :: y(:), yscal(:)
-        real(8), allocatable     :: xp(:), yp(:,:)
-
-        nvar = size(ystart)
-        allocate(xp(KMAX), yp(nvar,KMAX))
-        allocate(dydx(nvar))
-
-        dxsav = (x2-x1)/kmax
-        x = x1
-        h = sign(h1,x2-x1)
-        nok = 0
-        nbad = 0
-        kount = 0
-        y = ystart
-        if (kmax > 0) xsav = x-2*dxsav
-        do nstp=1,MAXSTP
-            call derivs(x,y,dydx)
-            
-            yscal = abs(y) + abs(h*dydx) + small
-            
-            if(kmax > 0) then
-              if(abs(x-xsav) > abs(dxsav)) then
-                  if(kount < kmax-1)then
-                    kount = kount+1
-                    xp(kount) = x
-                    yp(:,kount) = y
-                    xsav = x
-                  endif
-              endif
-            endif
-            if((x+h-x2)*(x+h-x1) > 0) h=x2-x
-            call rkqs(y,dydx,nvar,x,h,eps,yscal,hdid,hnext,derivs)
-            if(hdid == h) then
-                nok=nok+1
-            else
-                nbad=nbad+1
-            endif
-            if((x-x2)*(x2-x1) >= 0) then
-                ystart = y
-                if(kount < kmax) then
-                    kount = kount+1
-                    xp(kount) = x
-                    yp(:,kount) = y
-                endif
-                xp_data = xp(1:kount)
-                yp_data = yp(:,1:kount)
-                return
-            endif
-            if(abs(hnext) < hmin) then
-                stop 'stepsize smaller than minimum in odeint'
-            end if
-            h = hnext
-        end do
-        stop 'too many steps in odeint'
-        return
-    end subroutine odeint
+!    module subroutine odeint(ystart,x1,x2,eps,h1,hmin,nok,nbad,derivs)
+!        real(8), intent(inout)   :: ystart(:)
+!        real(8), intent(in)      :: x1, x2, eps, h1, hmin
+!        integer                  :: nbad, nok, nvar
+!        procedure(derivatives_p) :: derivs
+!        real(8), allocatable     :: dydx(:)
 !
-    module subroutine rkqs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs)
-        integer, intent(in)      :: n
-        real(8), intent(in)      :: eps, htry, dydx(n), yscal(n)
-        real(8), intent(out)     :: hnext, hdid, y(n)
-        real(8), intent(inout)   :: x
-        procedure(derivatives_p) :: derivs
-
-        real(8)              :: errmax, h, htemp, xnew
-        real(8), allocatable :: yerr(:), ytemp(:)
-        real(8), parameter   :: SAFETY = 0.9d0
-        real(8), parameter   :: PGROW = -0.2d0
-        real(8), parameter   :: PSHRNK = -0.25d0
-        real(8), parameter   :: ERRCON = 1.89d-4
-      
-        h = htry
-        do
-            call rk_cash_karp(y,dydx,x,h,ytemp,yerr,derivs)
-            errmax = maxval(abs(yerr/yscal))/eps
-            if(errmax > 1) then
-                htemp = SAFETY*h*(errmax**PSHRNK)
-                h = sign(max(abs(htemp),0.1d0*abs(h)),h)
-                if (abs(h) < epsilon(h)) then
-                    stop 'stepsize underflow in rkqs'
-                end if
-                xnew = x + h
-                cycle
-            else
-                if(errmax > ERRCON) then
-                    hnext = SAFETY*h*(errmax**PGROW)
-                else
-                    hnext = 5*h
-                endif
-                hdid = h
-                x = x+h
-                y = ytemp
-                exit
-            endif
-        end do
-    end subroutine rkqs
+!        real(8), parameter       :: small = 1.0d-30
+!        integer                  :: kount, nstp
+!        real(8)                  :: dxsav, h, hdid, hnext, x, xsav
+!        real(8), allocatable     :: y(:), yscal(:)
+!        real(8), allocatable     :: xp(:), yp(:,:)
+!
+!        nvar = size(ystart)
+!        allocate(xp(KMAX), yp(nvar,KMAX))
+!        allocate(dydx(nvar))
+!
+!        dxsav = (x2-x1)/kmax
+!        x = x1
+!        h = sign(h1,x2-x1)
+!        nok = 0
+!        nbad = 0
+!        kount = 0
+!        y = ystart
+!        if (kmax > 0) xsav = x-2*dxsav
+!        do nstp=1,MAXSTP
+!            call derivs(x,y,dydx)
+!            
+!            yscal = abs(y) + abs(h*dydx) + small
+!            
+!            if(kmax > 0) then
+!              if(abs(x-xsav) > abs(dxsav)) then
+!                  if(kount < kmax-1)then
+!                    kount = kount+1
+!                    xp(kount) = x
+!                    yp(:,kount) = y
+!                    xsav = x
+!                  endif
+!              endif
+!            endif
+!            if((x+h-x2)*(x+h-x1) > 0) h=x2-x
+!            call rkqs(y,dydx,nvar,x,h,eps,yscal,hdid,hnext,derivs)
+!            if(hdid == h) then
+!                nok=nok+1
+!            else
+!                nbad=nbad+1
+!            endif
+!            if((x-x2)*(x2-x1) >= 0) then
+!                ystart = y
+!                if(kount < kmax) then
+!                    kount = kount+1
+!                    xp(kount) = x
+!                    yp(:,kount) = y
+!                endif
+!                xp_data = xp(1:kount)
+!                yp_data = yp(:,1:kount)
+!                return
+!            endif
+!            if(abs(hnext) < hmin) then
+!                stop 'stepsize smaller than minimum in odeint'
+!            end if
+!            h = hnext
+!        end do
+!        stop 'too many steps in odeint'
+!        return
+!    end subroutine odeint
+!!
+!    module subroutine rkqs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs)
+!        integer, intent(in)      :: n
+!        real(8), intent(in)      :: eps, htry, dydx(n), yscal(n)
+!        real(8), intent(out)     :: hnext, hdid, y(n)
+!        real(8), intent(inout)   :: x
+!        procedure(derivatives_p) :: derivs
+!
+!        real(8)              :: errmax, h, htemp, xnew
+!        real(8), allocatable :: yerr(:), ytemp(:)
+!        real(8), parameter   :: SAFETY = 0.9d0
+!        real(8), parameter   :: PGROW = -0.2d0
+!        real(8), parameter   :: PSHRNK = -0.25d0
+!        real(8), parameter   :: ERRCON = 1.89d-4
+!      
+!        h = htry
+!        do
+!            call rk_cash_karp_original(y,dydx,x,h,ytemp,yerr,derivs)
+!            errmax = maxval(abs(yerr/yscal))/eps
+!            if(errmax > 1) then
+!                htemp = SAFETY*h*(errmax**PSHRNK)
+!                h = sign(max(abs(htemp),0.1d0*abs(h)),h)
+!                if (abs(h) < epsilon(h)) then
+!                    stop 'stepsize underflow in rkqs'
+!                end if
+!                xnew = x + h
+!                cycle
+!            else
+!                if(errmax > ERRCON) then
+!                    hnext = SAFETY*h*(errmax**PGROW)
+!                else
+!                    hnext = 5*h
+!                endif
+!                hdid = h
+!                x = x+h
+!                y = ytemp
+!                exit
+!            endif
+!        end do
+!    end subroutine rkqs
 !
 !   Cash-Karp - an adaptive Runge-Kutta method
 !   see https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    module subroutine rk_cash_karp(y, dydx, x, h, yout, yerr, derivs)
-
-        real(8), intent(in)               :: h, x, dydx(:), y(:)
-        real(8), allocatable, intent(out) :: yerr(:), yout(:)
+    module function rk_cash_karp(h,t,x,fp) result(xout)
+        real(8), intent(in)             :: h, t
+        real(8), intent(in), contiguous :: x(:,:)
+        procedure(f_p), pointer :: fp
+        real(8), dimension(size(x,1),size(x,2)) :: xout
+        real(8), dimension(size(x,1),size(x,2)) :: k1, k2, k3, k4, k5, k6
+        real(8) :: a2,a3,a4,a5,a6,b21,b31,b32,b41,b42,b43,b51,b52,b53
+        real(8) :: b54,b61,b62,b63,b64,b65,c1,c3,c4,c6,dc1,dc3,dc4,dc5,dc6
+     
+        parameter (a2=1/5.0d0, a3=3/10.0d0, a4=3/5.0d0, a5=1.0d0 ,a6=7/8.0d0,                               &
+                   b21=1/5.0d0,                                                                             &
+                   b31=3./40., b32=9./40.,                                                                  &
+                   b41=.3, b42=-.9, b43=1.2,                                                                &
+                   b51=-11./54., b52=2.5, b53=-70./27., b54=35./27.,                                        &
+                   b61=1631./55296.,b62=175./512., b63=575./13824.,b64=44275./110592.,b65=253./4096.,       &
+                   c1=37./378., c3=250./621., c4=125./594., c6=512./1771.,                                  &
+                   dc1=c1-2825./27648., dc3=c3-18575./48384., dc4=c4-13525./55296., dc5=-277./14336., dc6=c6-.25)
         
-        procedure(derivatives_p)          :: derivs
+        k1 = h*fp(t         , x   )
+        k2 = h*fp(t + a2*h  , x + b21*k1  )
+        k3 = h*fp(t + a3*h  , x + b31*k1 + b32*k2  )
+        k4 = h*fp(t + a4*h  , x + b41*k1 + b42*k2 + b43*k3   )
+        k5 = h*fp(t + a5*h  , x + b51*k1 + b52*k2 + b53*k3 + b54*k4   )
+        k6 = h*fp(t + a6*h  , x + b61*k1 + b62*k2 + b63*k3 + b64*k4 + b65*k5   )
+        xout = x + c1*k1 + c3*k3 + c4*k4 + c6*k6
+        x_error = dc1*k1 + dc3*k3 + dc4*k4 + dc5*k5 + dc6*k6
+    end function rk_cash_karp
 
-        real(8) :: ak2(size(y)),ak3(size(y)),ak4(size(y)),ak5(size(y)),ak6(size(y))
-        real(8) :: ytemp(size(y)),A2,A3,A4,A5,A6,B21,B31,B32,B41,B42,B43,B51,B52,B53
-        real(8) :: B54,B61,B62,B63,B64,B65,C1,C3,C4,C6,DC1,DC3,DC4,DC5,DC6
-     
-        parameter (A2=.2,A3=.3,A4=.6,A5=1.,A6=.875,B21=.2,B31=3./40.,              &
-                   B32=9./40.,B41=.3,B42=-.9,B43=1.2,B51=-11./54.,B52=2.5,         &
-                   B53=-70./27.,B54=35./27.,B61=1631./55296.,B62=175./512.,        &
-                   B63=575./13824.,B64=44275./110592.,B65=253./4096.,C1=37./378.,  &
-                   C3=250./621.,C4=125./594.,C6=512./1771.,DC1=C1-2825./27648.,    &
-                   DC3=C3-18575./48384.,DC4=C4-13525./55296.,DC5=-277./14336.,     &
-                   DC6=C6-.25)
-     
-        ytemp = y + B21*h*dydx
-
-        call derivs(x+A2*h,ytemp,ak2)
-
-        ytemp = y + h*(B31*dydx + B32*ak2)
-
-        call derivs(x+A3*h,ytemp,ak3)
-
-        ytemp =y+h*(B41*dydx+B42*ak2+B43*ak3)
-
-        call derivs(x+A4*h,ytemp,ak4)
-
-        ytemp=y+h*(B51*dydx+B52*ak2+B53*ak3+B54*ak4)
-
-        call derivs(x+A5*h,ytemp,ak5)
-
-        ytemp=y+h*(B61*dydx+B62*ak2+B63*ak3+B64*ak4+B65*ak5)
-
-        call derivs(x+A6*h,ytemp,ak6)
-
-        yout=y+h*(C1*dydx+C3*ak3+C4*ak4+C6*ak6)
-
-        yerr=h*(DC1*dydx+DC3*ak3+DC4*ak4+DC5*ak5+DC6*ak6)
-
-        return
-    end subroutine rk_cash_karp
-
+    module function rk_get_error() result(r)
+        real(8), dimension(:,:), pointer :: r
+        if (allocated(x_error)) then
+            r => x_error
+        else
+            nullify(r)
+        end if
+    end function rk_get_error
+        
     ! Explicit 4th order Runge-Kutta method
     module function rk_exp4(h,t,x,fp) result(xout)
         real(8), intent(in)             :: h, t
@@ -176,10 +168,10 @@ contains
         procedure(f_p), pointer :: fp
         real(8)                         :: xout(size(x,1),size(x,2))
         real(8), dimension(size(x,1),size(x,2)) :: k1, k2, k3, k4
-        k1   = h*fp(t    ,x     )
-        k2   = h*fp(t+h/2,x+k1/2)
-        k3   = h*fp(t+h/2,x+k2/2)
-        k4   = h*fp(t+h  ,x+k3  )
+        k1   = h*fp(t    , x     )
+        k2   = h*fp(t+h/2, x+k1/2)
+        k3   = h*fp(t+h/2, x+k2/2)
+        k4   = h*fp(t+h  , x+k3  )
         xout = x + k1/6 + k2/3 + k3/3 + k4/6
     end function rk_exp4
 
