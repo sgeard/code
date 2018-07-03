@@ -93,14 +93,14 @@ contains
         write (u,'(a)') 'set output "'//fstem//'png'
         write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
         write (u,'(a)') 'set xtics rotate 90'
-        if (.not. this%show_title) then
-            write (u,fmt='(a)',advance='no') ' notitle'
-        end if
         if (present(ymax)) then
             write(u,'(a,f0.2,a)') 'set yrange [0:',ymax,']'
         end if
         write (u,'(a)') 'set datafile separator ","'
-        write (u,fmt='(a)',advance='no') 'plot "'//data_file//'" using 2:3:xticlabels(1) w boxes lc rgb"red" notitle'
+        write (u,fmt='(a)',advance='no') 'plot "'//data_file//'" using 2:3:xticlabels(1) w boxes lc rgb"red"'
+        if (.not. this%show_title) then
+            write (u,fmt='(a)',advance='no') ' notitle'
+        end if
         close(u)
         call create_plot(this%gfile)
     end subroutine write_gpl_hist
@@ -161,9 +161,6 @@ contains
         if (allocated(this%title)) then
             write (u,'(a)') 'set title "'//this%title//'"'
         end if
-        if (.not. this%show_title) then
-            write (u,fmt='(a)',advance='no') ' notitle'
-        end if
         if (allocated(this%pos)) then
             write (u,'(a)') 'set key '//this%pos
         end if
@@ -191,8 +188,10 @@ contains
         else
             plot_command = 'plot "'//data_file//'"'//ptype
         end if
-        if (allocated(this%legend)) then
+        if (this%show_title .and. allocated(this%legend)) then
             plot_command = plot_command//' title "'//this%legend//'"'
+        else
+            plot_command = plot_command//' notitle "'
         end if
         write(u,'(a)') plot_command
         close(u)
