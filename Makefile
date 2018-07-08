@@ -11,22 +11,24 @@ ifdef intel
     F90_OPTS := -fPIC -fpp -DUSE_AUTODIFF -module $(ODIR)
     ifdef release
         F90_OPTS += -O3
+        ARCH_NAME := build-intel.tgz
     else
         F90_OPTS += -D_DEBUG -g -check bounds -warn all
+        ARCH_NAME := build-intel-debug.tgz
     endif
     LINK_OPTS := -static-intel
-    ARCH_NAME := build-intel.tgz
 else
     ODIR := obj_gfortran$(OBJ_DIR_SUFF)
     F90 := /usr/local/bin/gfortran
     F90_OPTS := -c -fPIC -cpp -std=f2008 -fimplicit-none -DUSE_AUTODIFF -ffree-line-length-200 -Wall -Wextra -J$(ODIR)
     ifdef release
         F90_OPTS += -O3
+        ARCH_NAME := build-gfortran.tgz
     else
         F90_OPTS += -D_DEBUG -W -ggdb -fbounds-check -ffpe-trap=denormal,invalid
+        ARCH_NAME := build-gfortran-debug.tgz
     endif
     LINK_OPTS :=
-    ARCH_NAME := build.tgz
 endif
 
 
