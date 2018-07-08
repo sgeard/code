@@ -40,6 +40,9 @@ $(ODIR):
     
 $(ODIR)/autodiff.o: autodiff.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
+    
+$(ODIR)/clib.o: clib.f90
+	$(F90) $(F90_OPTS) -c $< -o $@
 
 $(ODIR)/stats.o: stats.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
