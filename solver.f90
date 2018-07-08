@@ -63,7 +63,7 @@ module solver
             real(8), intent(in)             :: h, t
             real(8), intent(in), contiguous :: x(:,:)
             procedure(f_p), pointer :: fp
-            real(8)                         :: xout(size(x))
+            real(8)                         :: xout(size(x,1),size(x,2))
         end function rk_cash_karp
 
         module function rk_get_error() result(r)

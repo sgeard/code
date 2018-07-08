@@ -127,8 +127,8 @@ contains
     module function rk_cash_karp(h,t,x,fp) result(xout)
         real(8), intent(in)             :: h, t
         real(8), intent(in), contiguous :: x(:,:)
-        procedure(f_p), pointer :: fp
-        real(8), dimension(size(x,1),size(x,2)) :: xout
+        procedure(f_p), pointer         :: fp
+        real(8)                         :: xout(size(x,1),size(x,2))
         real(8), dimension(size(x,1),size(x,2)) :: k1, k2, k3, k4, k5, k6
         real(8) :: a2,a3,a4,a5,a6,b21,b31,b32,b41,b42,b43,b51,b52,b53
         real(8) :: b54,b61,b62,b63,b64,b65,c1,c3,c4,c6,dc1,dc3,dc4,dc5,dc6
