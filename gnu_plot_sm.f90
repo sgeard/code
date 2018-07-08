@@ -41,36 +41,29 @@ submodule (gnu_plot) gnu_plot_sm
 
 contains
 
-    module subroutine create_plot(fname)
+    module subroutine create_plot(this, fname)
+        class(gplot_t)               :: this
         character(len=*), intent(in) :: fname
+        character(len=:), allocatable :: command
         character(len=64) :: cmsg
-        integer           :: cstat
-        call execute_command_line('gnuplot '//fname,cmdstat=cstat,cmdmsg=cmsg)
+        integer           :: cstat, estat
+        integer           :: u
+        command = 'gnuplot '//fname//' 2>/dev/null'
+        call execute_command_line(command,cmdstat=cstat,cmdmsg=cmsg,exitstat=estat)
         if (cstat /= 0) then
             write(*,*) cmsg
-            stop 1
-        end if    
+            stop '***Error: plot command failed'
+        end if
+        if (estat /= 0) then
+            write(*,'(a,i0)') command//': status = ',estat
+            stop '***Error: plot command failed'
+        end if
+        if (.not. this%keep_plot_files) then
+            !write(*,'(a)') 'Deleting '//fname
+            open(newunit=u,file=fname,status='old')
+            close(u,status='delete')
+        endif
     end subroutine create_plot
-
-    module subroutine append_plot(fname, plot_command)
-        character(len=*), intent(in) :: fname, plot_command
-        character(len=64)   :: cmsg
-        character(len=1000) :: line
-        integer             :: cstat
-        integer             :: u
-        
-        open(newunit=u,file=fname//'gpl',status='old',position='append',action='readwrite')
-        backspace(u)
-        read(u,'(a1000)') line
-        backspace(u)
-        write(u,fmt='(a)',advance='no') trim(line)//', '//plot_command
-        close(u)
-        call execute_command_line('gnuplot '//fname//'gpl',cmdstat=cstat,cmdmsg=cmsg)
-        if (cstat /= 0) then
-            write(*,*) cmsg
-            stop 1
-        end if    
-    end subroutine append_plot
     
     ! Write gnuplot file for histograms
     module subroutine write_gpl_hist(this, data_file, ymax)
@@ -102,7 +95,7 @@ contains
             write (u,fmt='(a)',advance='no') ' notitle'
         end if
         close(u)
-        call create_plot(this%gfile)
+        call this%create_plot(this%gfile)
     end subroutine write_gpl_hist
     
     ! Write gnuplot file for scatter plots
@@ -133,14 +126,14 @@ contains
             write (u,fmt='(a)',advance='no') ' notitle'
         end if
         close(u)
-        call create_plot(this%gfile)
+        call this%create_plot(this%gfile)
     end subroutine write_gpl_scat
     
     ! Write gnuplot file for line plots
     module subroutine write_gpl_line(this,data_file,columns)
-        class(line), intent(in)       :: this
-        character(len=*), intent(in)  :: data_file
-        integer, optional, intent(in) :: columns(2)
+        class(line_plot_t), intent(in) :: this
+        character(len=*), intent(in)   :: data_file
+        integer, optional, intent(in)  :: columns(2)
         
         integer                       :: u
         character(len=:), allocatable :: ptype
@@ -195,15 +188,15 @@ contains
         end if
         write(u,'(a)') plot_command
         close(u)
-        call create_plot(this%gfile)
+        !call this%create_plot(this%gfile)
     end subroutine write_gpl_line
     
     ! Write gnuplot file for line plots
     module subroutine append_gpl_line(this,data_file,columns,force_create)
-        class(line), intent(in)       :: this
-        character(len=*), intent(in)  :: data_file
-        integer, optional, intent(in) :: columns(2)
-        logical, optional, intent(in) :: force_create
+        class(line_plot_t), intent(in) :: this
+        character(len=*), intent(in)   :: data_file
+        integer, optional, intent(in)  :: columns(2)
+        logical, optional, intent(in)  :: force_create
         
         integer                       :: u
         character(len=1000)           :: line
@@ -254,8 +247,8 @@ contains
     end subroutine append_gpl_line
 
     module subroutine create_gpl_line(this)
-        class(line), intent(in) :: this
-        call create_plot(this%gfile)
+        class(line_plot_t), intent(in) :: this
+        call this%create_plot(this%gfile)
     end subroutine create_gpl_line
 
 end submodule gnu_plot_sm

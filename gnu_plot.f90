@@ -41,14 +41,16 @@ module gnu_plot
     integer, parameter :: plot_type_points = 1    
     integer, parameter :: plot_type_lines  = 2
 
-    type, abstract :: gplot_t
+    type :: gplot_t
         character(len=:), allocatable :: gfile
         character(len=:), allocatable :: title
         character(len=:), allocatable :: xlabel
         character(len=:), allocatable :: ylabel
         logical                       :: ignore_first_row = .false.
         logical                       :: show_title = .true.
+        logical                       :: keep_plot_files = .false.
     contains
+        procedure                     :: create_plot
     end type gplot_t
     
     type, extends(gplot_t) :: histogram
@@ -61,7 +63,7 @@ module gnu_plot
         procedure :: write => write_gpl_scat   
     end type scatter
 
-    type, extends(gplot_t) :: line
+    type, extends(gplot_t) :: line_plot_t
         integer                       :: plot_type = plot_type_lines
         logical                       :: plot_is_square = .false.
         character(len=:), allocatable :: legend
@@ -70,16 +72,13 @@ module gnu_plot
         procedure :: write => write_gpl_line
         procedure :: append => append_gpl_line
         procedure :: create => create_gpl_line
-    end type line
+    end type line_plot_t
 
     interface
-        module subroutine create_plot(fname)
+        module subroutine create_plot(this, fname)
+            class(gplot_t)               :: this
             character(len=*), intent(in) :: fname
         end subroutine create_plot
-        
-        module subroutine append_plot(fname, plot_command)
-            character(len=*), intent(in) :: fname, plot_command
-        end subroutine append_plot
         
         module subroutine write_gpl_hist(this, data_file, ymax)
             class(histogram), intent(in)   :: this
@@ -93,20 +92,20 @@ module gnu_plot
         end subroutine write_gpl_scat
         
         module subroutine write_gpl_line(this,data_file,columns)
-            class(line), intent(in)       :: this
+            class(line_plot_t), intent(in)       :: this
             character(len=*), intent(in)  :: data_file
             integer, optional, intent(in) :: columns(2)
         end subroutine write_gpl_line
         
         module subroutine append_gpl_line(this,data_file,columns,force_create)
-            class(line), intent(in)       :: this
-            character(len=*), intent(in)  :: data_file
-            integer, optional, intent(in) :: columns(2)
-            logical, optional, intent(in) :: force_create
+            class(line_plot_t), intent(in) :: this
+            character(len=*), intent(in)   :: data_file
+            integer, optional, intent(in)  :: columns(2)
+            logical, optional, intent(in)  :: force_create
         end subroutine append_gpl_line
         
         module subroutine create_gpl_line(this)
-            class(line), intent(in) :: this
+            class(line_plot_t), intent(in) :: this
         end subroutine create_gpl_line
 
     end interface
