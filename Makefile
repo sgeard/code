@@ -45,6 +45,12 @@ $(ODIR)/autodiff.o: autodiff.f90
     
 $(ODIR)/clib.o: clib.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
+    
+$(ODIR)/bucket.o: bucket.f90
+	$(F90) $(F90_OPTS) -c $< -o $@
+   
+$(ODIR)/stl.o: stl.f90
+	$(F90) $(F90_OPTS) -c $< -o $@
 
 $(ODIR)/stats.o: stats.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
@@ -78,9 +84,12 @@ $(ODIR)/libcode.so: $(OBJ)
 
 archive: $(ARCH_NAME)
 
-test_stats: stats.f90 archive
-	$(F90) -o $@ $(F90_OPTS) -DTEST_STATS $< libcode.a
-   
+test_stl: stl.f90 $(ODIR)/libcode.a
+	$(F90) -o $@ $(F90_OPTS) -DTEST_STL $< $(ODIR)/libcode.a
+
+test_stats: stats.f90 archive $(ODIR)/libcode.a
+	$(F90) -o $@ $(F90_OPTS) -DTEST_STATS $< $(ODIR)/libcode.a
+
 $(ARCH_NAME): $(ODIR)/libcode.so $(ODIR)/libcode.a
 	tar czvf $@ $(ODIR)/libcode.so $(ODIR)/libcode.a $(ODIR)/*.mod
 

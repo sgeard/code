@@ -44,14 +44,20 @@ contains
         have_contents_bucket = this%contents_written
     end function have_contents_bucket
     
-    pure subroutine initialize_bucket(this, capacity, row_size, fname)
+    pure subroutine initialize_bucket(this, capacity, row_size, fname, no_delete)
         class(bucket_t), intent(inout)  :: this
         character(len=*), intent(in)    :: fname
         integer, intent(in)             :: capacity
         integer, intent(in)             :: row_size
+        logical, intent(in), optional   :: no_delete
         
         allocate(this%contents(row_size, capacity))
         this%file_name = fname
+        if (present(no_delete)) then
+            if (no_delete) then
+                this%file_status = 'old'
+            end if
+        end if
     end subroutine initialize_bucket
     
     subroutine add_bucket(this,item)
@@ -79,6 +85,7 @@ contains
                 this%file_status = 'old'
             end if
             close(u)
+            this%contents_written = .true.
         end if
     end subroutine empty_bucket
     
