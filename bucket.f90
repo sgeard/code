@@ -27,7 +27,6 @@ module bucket
         private
         integer                       :: high_water = 0
         character(len=:), allocatable :: file_name
-        character(len=7)              :: file_status = 'replace'
         real(8), allocatable          :: contents(:,:)
         logical                       :: contents_written = .false.
     contains
@@ -44,7 +43,7 @@ contains
         have_contents_bucket = this%contents_written
     end function have_contents_bucket
     
-    pure subroutine initialize_bucket(this, capacity, row_size, fname, no_delete)
+    subroutine initialize_bucket(this, capacity, row_size, fname, no_delete)
         class(bucket_t), intent(inout)  :: this
         character(len=*), intent(in)    :: fname
         integer, intent(in)             :: capacity
@@ -55,7 +54,7 @@ contains
         this%file_name = fname
         if (present(no_delete)) then
             if (no_delete) then
-                this%file_status = 'old'
+                this%contents_written = .true.
             end if
         end if
     end subroutine initialize_bucket
@@ -64,27 +63,35 @@ contains
         class(bucket_t), intent(inout) :: this
         real(8), intent(in)            :: item(:)
  
+        if (len(this%file_name) == 0) then
+            stop '***Error: bucket not created'
+        end if
+
+        if (size(item) /= size(this%contents,1)) then
+            write(*,'(2(a,i0))') 'item size = ',size(item) , ' c.f. bucket row_size = ',size(this%contents,1)
+            stop '***Error: cannot add item to bucket'
+        end if
         if (this%high_water == size(this%contents,2)) then
             call this%empty
-        else
-            this%high_water = this%high_water + 1
-            this%contents(:,this%high_water) = item
         end if
+        this%high_water = this%high_water + 1
+        this%contents(:,this%high_water) = item
     end subroutine add_bucket
 
     subroutine empty_bucket(this)
         class(bucket_t), intent(inout)  :: this
         integer :: i, k, u
         if (this%high_water > 0) then
-            open(newunit=u, file=this%file_name, status=this%file_status)
+            if (this%contents_written) then
+                open(newunit=u, file=this%file_name, status='old', position='append')
+            else
+                open(newunit=u, file=this%file_name, status='replace')
+            end if
             do k=1,this%high_water
                 write(u,'(*(es13.5))') (this%contents(i,k),i=1,size(this%contents,1))
             end do
             this%high_water = 0
-            if (this%file_status == 'replace') then
-                this%file_status = 'old'
-            end if
-            close(u)
+            close(u,status='keep')
             this%contents_written = .true.
         end if
     end subroutine empty_bucket
