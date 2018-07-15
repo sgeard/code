@@ -1,4 +1,4 @@
-.PHONY: all clean help archive test
+.PHONY: all clean help archive test all_archives
 
 ifdef release
     OBJ_DIR_SUFF := _release
@@ -33,6 +33,12 @@ endif
 
 
 all: $(ODIR) $(ODIR)/libcode.a $(ODIR)/libcode.so archive
+
+all_archives:
+	$(MAKE)
+	$(MAKE) release=t
+	$(MAKE) intel=t
+	$(MAKE) intel=t release=t
 
 SRC := $(wildcard *.f90)
 OBJ := ${SRC:%.f90=$(ODIR)/%.o}
