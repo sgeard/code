@@ -58,7 +58,8 @@ module gnu_plot
         procedure :: write => write_gpl_hist    
     end type histogram
     
-    type, extends(gplot_t) :: scatter   
+    type, extends(gplot_t) :: scatter
+        logical   :: plot_with_dots = .false.
     contains
         procedure :: write => write_gpl_scat   
     end type scatter

@@ -125,6 +125,11 @@ contains
         if (.not. this%show_title) then
             write (u,fmt='(a)',advance='no') ' notitle'
         end if
+        if (this%plot_with_dots) then
+            write (u,fmt='(a)',advance='no') ' with dots'
+        else
+            write (u,fmt='(a)',advance='no') ' with points'
+        end if
         close(u)
         call this%create_plot(this%gfile)
     end subroutine write_gpl_scat
