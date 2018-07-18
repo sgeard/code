@@ -35,111 +35,50 @@ module bucket
         logical                       :: is_real_bucket = .true.
     contains
         procedure :: add => add_bucket
+        procedure :: delete => delete_bucket
         procedure :: empty => empty_bucket
         procedure :: create => initialize_bucket
         procedure :: have_contents => have_contents_bucket
         procedure :: get_contents_ref => get_contents_ref_bucket
         procedure :: number_of_items => number_of_items_bucket
     end type bucket_t
-    
-contains
 
-    integer function number_of_items_bucket(this)
-        class(bucket_t), intent(in)  :: this
-        number_of_items_bucket = this%high_water
-    end function number_of_items_bucket
+    interface
 
-    function get_contents_ref_bucket(this) result(r)
-        class(bucket_t), target, intent(in) :: this
-        real(8), pointer :: r(:,:)
-        r => this%contents(:,1:this%high_water)
-    end function get_contents_ref_bucket
+        module subroutine delete_bucket(this)
+            class(bucket_t), intent(inout) :: this
+        end subroutine delete_bucket
     
-    pure logical function have_contents_bucket(this)
-        class(bucket_t), intent(in)  :: this
-        have_contents_bucket = this%contents_written
-    end function have_contents_bucket
+        module pure integer function number_of_items_bucket(this)
+            class(bucket_t), intent(in)  :: this
+        end function number_of_items_bucket
     
-    subroutine initialize_bucket(this, capacity, row_size, fname, no_delete)
-        class(bucket_t), intent(inout)         :: this
-        integer, intent(in)                    :: capacity
-        integer, intent(in)                    :: row_size
-        character(len=*), intent(in), optional :: fname
-        logical, intent(in), optional          :: no_delete
+        module function get_contents_ref_bucket(this) result(r)
+            class(bucket_t), target, intent(in) :: this
+            real(8), pointer :: r(:,:)
+        end function get_contents_ref_bucket
+   
+        module pure logical function have_contents_bucket(this)
+            class(bucket_t), intent(in)  :: this
+        end function have_contents_bucket
         
-        if (capacity == 0) then
-            stop '***Error: bucket capacity must be non-zero'
-        end if
-        if (row_size <= 0) then
-            stop '***Error: row_size must be a positive integer'
-        end if
-        this%is_real_bucket = (capacity > 0)
-        allocate(this%contents(row_size, abs(capacity)))
-        if (present(fname)) then
-            this%file_name = fname
-        else
-            if (capacity > 0) then
-                stop '***Error: real bucket (capacity > 0) must have a file name'
-            end if
-        end if
-        if (present(no_delete)) then
-            if (no_delete) then
-                this%contents_written = .true.
-            end if
-        end if
-    end subroutine initialize_bucket
-    
-    subroutine add_bucket(this,item)
-        class(bucket_t), intent(inout) :: this
-        real(8), intent(in)            :: item(:)
- 
-        if (this%is_real_bucket .and. len(this%file_name) == 0) then
-            stop '***Error: bucket not created'
-        end if
+        module subroutine initialize_bucket(this, capacity, row_size, fname, no_delete)
+            class(bucket_t), intent(inout)         :: this
+            integer, intent(in)                    :: capacity
+            integer, intent(in)                    :: row_size
+            character(len=*), intent(in), optional :: fname
+            logical, intent(in), optional          :: no_delete
+        end subroutine initialize_bucket
 
-        if (size(item) /= size(this%contents,1)) then
-            write(*,'(2(a,i0))') 'item size = ',size(item) , ' c.f. bucket row_size = ',size(this%contents,1)
-            stop '***Error: cannot add item to bucket'
-        end if
+        module subroutine add_bucket(this,item)
+            class(bucket_t), intent(inout) :: this
+            real(8), intent(in)            :: item(:)
+        end subroutine add_bucket
         
-        if (this%high_water == size(this%contents,2)) then
-            if (this%is_real_bucket) then
-                ! A real bucket so empty it
-                call this%empty
-            else
-                ! A virtual bucket so just double the size if the limit has been reached
-                block
-                    real(8), allocatable :: tmp(:,:)
-                    allocate(tmp(size(this%contents,1),2*size(this%contents,2)))
-                    tmp(:,1:this%high_water) = this%contents
-                    call move_alloc(tmp,this%contents)
-                end block
-            end if
-        end if
-            
-        this%high_water = this%high_water + 1
-        this%contents(:,this%high_water) = item
-    end subroutine add_bucket
-
-    subroutine empty_bucket(this)
-        class(bucket_t), intent(inout)  :: this
-        integer :: i, k, u
-        ! This does nothing if the bucket is virtual
-        if (this%is_real_bucket .and. this%high_water > 0) then
-            if (this%contents_written) then
-                open(newunit=u, file=this%file_name, status='old', position='append')
-            else
-                open(newunit=u, file=this%file_name, status='replace')
-            end if
-            do k=1,this%high_water
-                write(u,'(*(es13.5))') (this%contents(i,k),i=1,size(this%contents,1))
-            end do
-            close(u,status='keep')
-            this%contents_written = .true.
-        end if
-        this%high_water = 0
-        return
-    end subroutine empty_bucket
-    
+        module subroutine empty_bucket(this)
+            class(bucket_t), intent(inout)  :: this
+        end subroutine empty_bucket
+    end interface
+       
 end module bucket
 

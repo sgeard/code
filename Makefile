@@ -55,13 +55,16 @@ $(ODIR)/clib.o: clib.f90
 $(ODIR)/bucket.o: bucket.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
    
+$(ODIR)/bucket_sm.o: bucket_sm.f90 $(ODIR)/bucket.o
+	$(F90) $(F90_OPTS) -c $< -o $@
+   
 $(ODIR)/stl.o: stl.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
 
 $(ODIR)/stats.o: stats.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
 
-$(ODIR)/stats_sm.o: stats_sm.f90
+$(ODIR)/stats_sm.o: stats_sm.f90 $(ODIR)/stats.o
 	$(F90) $(F90_OPTS) -c $< -o $@
 
 $(ODIR)/vector_analysis.o: $(ODIR)/autodiff.o vector_analysis.f90
