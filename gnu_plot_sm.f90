@@ -189,7 +189,7 @@ contains
         if (this%show_title .and. allocated(this%legend)) then
             plot_command = plot_command//' title "'//this%legend//'"'
         else
-            plot_command = plot_command//' notitle "'
+            plot_command = plot_command//' notitle '
         end if
         write(u,'(a)') plot_command
         close(u)
