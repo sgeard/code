@@ -243,8 +243,10 @@ contains
         else
             plot_command = '"'//data_file//'"'//ptype
         end if
-        if (allocated(this%legend)) then
+        if (this%show_title .and. allocated(this%legend)) then
             plot_command = plot_command//' title "'//this%legend//'"'
+        else
+            plot_command = plot_command//' notitle '
         end if
         write(u,fmt='(a)',advance='no') trim(line)//', '//plot_command
         close(u)
