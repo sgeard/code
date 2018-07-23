@@ -8,7 +8,7 @@ module solver
 
     private
 
-    public rk_exp4, rk_exp38, rk_cash_karp, rk_get_error
+    public rk_exp4, rk_exp38, rk_cash_karp, rk_get_error, realft
     public f_p, derivatives_p, solver_p
     
     abstract interface
