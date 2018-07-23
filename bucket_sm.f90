@@ -47,11 +47,18 @@ contains
         number_of_items_bucket = this%high_water
     end function number_of_items_bucket
 
-    module function get_contents_ref_bucket(this) result(r)
+    module function get_all_contents_ref_bucket(this) result(r)
         class(bucket_t), target, intent(in) :: this
         real(8), pointer :: r(:,:)
         r => this%contents(:,1:this%high_water)
-    end function get_contents_ref_bucket
+    end function get_all_contents_ref_bucket
+    
+    module function get_layer_contents_ref_bucket(this, n) result(r)
+        class(bucket_t), target, intent(in) :: this
+        integer, intent(in)                 :: n
+        real(8), pointer :: r(:)
+        r => this%contents(:,n)
+    end function get_layer_contents_ref_bucket
     
     module pure logical function have_contents_bucket(this)
         class(bucket_t), intent(in)  :: this

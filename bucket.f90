@@ -39,12 +39,14 @@ module bucket
         procedure :: empty => empty_bucket
         procedure :: create => initialize_bucket
         procedure :: have_contents => have_contents_bucket
-        procedure :: get_contents_ref => get_contents_ref_bucket
+        procedure :: get_all_contents_ref_bucket
+        procedure :: get_layer_contents_ref_bucket
         procedure :: number_of_items => number_of_items_bucket
+        generic, public :: get_contents_ref => get_all_contents_ref_bucket, get_layer_contents_ref_bucket
     end type bucket_t
 
     interface
-
+        
         module subroutine delete_bucket(this)
             class(bucket_t), intent(inout) :: this
         end subroutine delete_bucket
@@ -53,10 +55,16 @@ module bucket
             class(bucket_t), intent(in)  :: this
         end function number_of_items_bucket
     
-        module function get_contents_ref_bucket(this) result(r)
+        module function get_all_contents_ref_bucket(this) result(r)
             class(bucket_t), target, intent(in) :: this
             real(8), pointer :: r(:,:)
-        end function get_contents_ref_bucket
+        end function get_all_contents_ref_bucket
+    
+        module function get_layer_contents_ref_bucket(this, n) result(r)
+            class(bucket_t), target, intent(in) :: this
+            integer, intent(in)                 :: n
+            real(8), pointer :: r(:)
+        end function get_layer_contents_ref_bucket
    
         module pure logical function have_contents_bucket(this)
             class(bucket_t), intent(in)  :: this
