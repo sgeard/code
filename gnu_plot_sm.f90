@@ -42,7 +42,7 @@ submodule (gnu_plot) gnu_plot_sm
 contains
 
     module subroutine create_plot(this, fname)
-        class(gplot_t)               :: this
+        class(gplot_t), intent(in)   :: this
         character(len=*), intent(in) :: fname
         character(len=:), allocatable :: command
         character(len=64) :: cmsg
@@ -65,6 +65,53 @@ contains
         endif
     end subroutine create_plot
     
+    
+    module subroutine write_bar_plot(this, data_file, columns)
+        class(bar_plot_t), intent(inout) :: this
+        character(len=*), intent(in)     :: data_file
+        integer, optional, intent(in)    :: columns(2)
+        character(len=16) :: col_str
+        integer           :: u
+        character(len=:), allocatable :: fstem
+        
+        open (newunit=u,file=this%gfile,access='sequential',status='replace')
+        
+        if (this%ignore_first_row) then
+            write (u,'(a)') 'set key autotitle columnhead'
+        end if
+        write (u,'(a)') 'set xlabel '//this%xlabel
+        if (allocated(this%ylabel)) then
+            write (u,'(a)') 'set ylabel '//this%ylabel
+        else
+            write (u,'(a)') 'set ylabel "Frequency"'
+        end if
+        write (u,'(a)') 'set title "'//this%title//'"'
+        write (u,'(a)') 'set boxwidth 1 relative'
+        write (u,'(a)') 'set term png truecolor'
+        fstem = this%gfile(1:len(this%gfile)-3)
+        write (u,'(a)') 'set output "'//fstem//'png'
+        write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
+        write (u,'(a)') 'set xtics rotate 90'
+        if (this%hide_x_labels) then
+            write (u,'(a)') 'unset xtics'
+        end if
+        if (this%hide_y_labels) then
+            write (u,'(a)') 'unset ytics'
+        end if
+        if (present(columns)) then
+            write(col_str,'(i0,a,i0)') columns(1),':',columns(2)
+        else
+            col_str = '1:2'
+        end if
+        !write (u,'(a)') 'set datafile separator ","'
+        write (u,fmt='(a)',advance='no') 'plot "'//data_file//'" using '//trim(col_str)//':xticlabels(1) w boxes lc rgb"red"'
+        if (.not. this%show_title) then
+            write (u,fmt='(a)',advance='no') ' notitle'
+        end if
+        close(u)
+        call this%create_plot(this%gfile)
+    end subroutine write_bar_plot
+
     ! Write gnuplot file for histograms
     module subroutine write_gpl_hist(this, data_file, ymax)
         class(histogram), intent(in)   :: this
@@ -122,6 +169,12 @@ contains
         fstem = this%gfile(1:len(this%gfile)-3)
         write (u,'(a)') 'set output "'//fstem//'png"'
         write (u,fmt='(a)',advance='no') 'plot "'//data_file//'"'
+        if (this%hide_x_labels) then
+            write (u,'(a)') 'unset xtics'
+        end if
+        if (this%hide_y_labels) then
+            write (u,'(a)') 'unset ytics'
+        end if
         if (.not. this%show_title) then
             write (u,fmt='(a)',advance='no') ' notitle'
         end if
@@ -161,6 +214,12 @@ contains
         end if
         if (allocated(this%pos)) then
             write (u,'(a)') 'set key '//this%pos
+        end if
+        if (this%hide_x_labels) then
+            write (u,'(a)') 'unset xtics'
+        end if
+        if (this%hide_y_labels) then
+            write (u,'(a)') 'unset ytics'
         end if
         write (u,'(a)') 'set term png truecolor'
         fstem = this%gfile(1:len(this%gfile)-3)

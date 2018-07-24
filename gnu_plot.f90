@@ -49,6 +49,8 @@ module gnu_plot
         logical                       :: ignore_first_row = .false.
         logical                       :: show_title = .true.
         logical                       :: keep_plot_files = .false.
+        logical                       :: hide_x_labels = .false.
+        logical                       :: hide_y_labels = .false.
     contains
         procedure                     :: create_plot
     end type gplot_t
@@ -75,9 +77,21 @@ module gnu_plot
         procedure :: create => create_gpl_line
     end type line_plot_t
 
+    type, extends(gplot_t) :: bar_plot_t
+    contains
+        procedure :: write => write_bar_plot
+    end type bar_plot_t
+    
     interface
+    
+        module subroutine write_bar_plot(this, data_file, columns)
+            class(bar_plot_t), intent(inout) :: this
+            character(len=*), intent(in)     :: data_file
+            integer, optional, intent(in)    :: columns(2)
+        end subroutine write_bar_plot
+        
         module subroutine create_plot(this, fname)
-            class(gplot_t)               :: this
+            class(gplot_t), intent(in)               :: this
             character(len=*), intent(in) :: fname
         end subroutine create_plot
         
