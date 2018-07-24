@@ -42,10 +42,17 @@ module bucket
         procedure :: get_all_contents_ref_bucket
         procedure :: get_layer_contents_ref_bucket
         procedure :: number_of_items => number_of_items_bucket
+        procedure :: add_to_layer => add_to_layer_bucket
         generic, public :: get_contents_ref => get_all_contents_ref_bucket, get_layer_contents_ref_bucket
     end type bucket_t
 
     interface
+        
+        module subroutine add_to_layer_bucket(this, n, v)
+            class(bucket_t), intent(inout) :: this
+            integer, intent(in)            :: n
+            real(8), intent(in)            :: v
+        end subroutine add_to_layer_bucket
         
         module subroutine delete_bucket(this)
             class(bucket_t), intent(inout) :: this

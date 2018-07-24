@@ -23,6 +23,13 @@
 submodule (bucket) bucket_sm
     
 contains
+        
+    module subroutine add_to_layer_bucket(this, n, v)
+        class(bucket_t), intent(inout) :: this
+        integer, intent(in)            :: n
+        real(8), intent(in)            :: v
+        this%contents(n,1:this%high_water) = this%contents(n,1:this%high_water) + v
+    end subroutine add_to_layer_bucket
 
     module subroutine delete_bucket(this)
         class(bucket_t), intent(inout) :: this
@@ -57,7 +64,7 @@ contains
         class(bucket_t), target, intent(in) :: this
         integer, intent(in)                 :: n
         real(8), pointer :: r(:)
-        r => this%contents(:,n)
+        r => this%contents(n,:)
     end function get_layer_contents_ref_bucket
     
     module pure logical function have_contents_bucket(this)
