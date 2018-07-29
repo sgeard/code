@@ -75,7 +75,8 @@ contains
         
         ! Calculate the range of data in 'col' for each bin
         do i=0, this%nbins-1
-            hist_mask  = (this%bin_min + i*bin_size) < col_data .and. col_data <= (this%bin_min + (i+1)*bin_size)
+            hist_mask  = (this%bin_min + i*bin_size) < col_data .and. &
+                          col_data <= (this%bin_min + (i+1)*bin_size)
             this%frequency(i) = count(hist_mask)/bin_size
         end do
     end subroutine create_hist2
@@ -110,11 +111,13 @@ contains
         associate (bin_start=>this%bin_min, freq=>this%frequency)
             if (this%int_bin_size) then
                 do i=0, this%nbins-1
-                    write(u,'(2(a,i0),a,f0.2,a,f0.2)') '(',nint(bin_start+i*bin_size),'->',nint(bin_start+(i+1)*bin_size),'],',bin_start+i*bin_size+bin_size/2,',',freq(i)
+                    write(u,'(2(a,i0),a,f0.2,a,f0.2)') '(',nint(bin_start+i*bin_size), &
+                    '->',nint(bin_start+(i+1)*bin_size),'],',bin_start+i*bin_size+bin_size/2,',',freq(i)
                 end do
             else
                 do i=0, this%nbins-1
-                    write(u,'(2(a,es9.2),a,es9.2,a,es9.2)') '(',bin_start+i*bin_size,'->',bin_start+(i+1)*bin_size,'],',bin_start+i*bin_size+bin_size/2,',',freq(i)
+                    write(u,'(2(a,es9.2),a,es9.2,a,es9.2)') '(',bin_start+i*bin_size,'->', &
+                    bin_start+(i+1)*bin_size,'],',bin_start+i*bin_size+bin_size/2,',',freq(i)
                 end do
             end if
         end associate

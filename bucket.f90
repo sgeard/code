@@ -42,17 +42,18 @@ module bucket
         procedure :: get_all_contents_ref_bucket
         procedure :: get_layer_contents_ref_bucket
         procedure :: number_of_items => number_of_items_bucket
-        procedure :: add_to_layer => add_to_layer_bucket
+        procedure :: apply_linear_transform => apply_linear_transform_bucket
         generic, public :: get_contents_ref => get_all_contents_ref_bucket, get_layer_contents_ref_bucket
     end type bucket_t
 
     interface
         
-        module subroutine add_to_layer_bucket(this, n, v)
+        ! Apply a*contents + b
+        module subroutine apply_linear_transform_bucket(this, n, a, b)
             class(bucket_t), intent(inout) :: this
             integer, intent(in)            :: n
-            real(8), intent(in)            :: v
-        end subroutine add_to_layer_bucket
+            real(8), intent(in), optional  :: a, b
+        end subroutine apply_linear_transform_bucket
         
         module subroutine delete_bucket(this)
             class(bucket_t), intent(inout) :: this

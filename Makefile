@@ -1,19 +1,21 @@
-.PHONY: all clean help archive test all_archives
+.PHONY: all clean help archive test all_archives clean_all_archives
 
 ifdef release
     OBJ_DIR_SUFF := _release
 else
     OBJ_DIR_SUFF := _debug
 endif
+
 ifdef intel
     ODIR := obj_intel$(OBJ_DIR_SUFF)
     F90 := ifort
     F90_OPTS := -fPIC -fpp -DUSE_AUTODIFF -module $(ODIR)
     ifdef release
-        F90_OPTS += -O3
+        F90_OPTS_EXTRA := #-fp-model precise -fprotect-parens -xHost -prec-sqrt -qopenmp-simd -qopenmp -stand f08
+        F90_OPTS += -O3 $(F90_OPTS_EXTRA) -warn all
         ARCH_NAME := build-intel.tgz
     else
-        F90_OPTS += -D_DEBUG -g -check bounds -warn all
+        F90_OPTS += -D_DEBUG -g -check bounds -warn all -debug-parameters used -traceback
         ARCH_NAME := build-intel-debug.tgz
     endif
     LINK_OPTS := -static-intel
@@ -103,7 +105,14 @@ $(ARCH_NAME): $(ODIR)/libcode.so $(ODIR)/libcode.a
 	tar czvf $@ $(ODIR)/libcode.so $(ODIR)/libcode.a $(ODIR)/*.mod
 
 clean:
-	@rm -vrf $(ODIR) *~ built.tgz test_stats
+	@rm -vrf $(ODIR) *~ $(ARCH_NAME) test_stats
+    
+clean_all_archives:
+	$(MAKE) clean
+	$(MAKE) release=t clean
+	$(MAKE) intel=t clean
+	$(MAKE) intel=t release=t clean
+
 	
 help:
 	@echo "SRC = $(SRC)"

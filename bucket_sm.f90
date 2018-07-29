@@ -24,12 +24,20 @@ submodule (bucket) bucket_sm
     
 contains
         
-    module subroutine add_to_layer_bucket(this, n, v)
+    module subroutine apply_linear_transform_bucket(this, n, a, b)
         class(bucket_t), intent(inout) :: this
         integer, intent(in)            :: n
-        real(8), intent(in)            :: v
-        this%contents(n,1:this%high_water) = this%contents(n,1:this%high_water) + v
-    end subroutine add_to_layer_bucket
+        real(8), intent(in), optional  :: a, b
+        if (present(a) .and. present(b)) then
+            this%contents(n,1:this%high_water) = a*this%contents(n,1:this%high_water) + b
+        else if (present(a)) then
+            this%contents(n,1:this%high_water) = a*this%contents(n,1:this%high_water)
+        else if (present(b)) then
+            this%contents(n,1:this%high_water) = this%contents(n,1:this%high_water) + b
+        else
+            ! Do nothing
+        end if
+    end subroutine apply_linear_transform_bucket
 
     module subroutine delete_bucket(this)
         class(bucket_t), intent(inout) :: this

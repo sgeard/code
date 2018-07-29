@@ -4,12 +4,8 @@
 
 submodule (solver) solver_sm
     
-    integer, parameter :: MAXSTP = 1000000
-    integer, parameter :: KMAX = 10000
     real(8), parameter :: pi = 4*atan(1.0d0)
     real(8), parameter :: two_pi = 2*pi
-    integer                      :: kount
-    real(8)                      :: dxsav
     real(8), allocatable, target :: xp_data(:), yp_data(:,:)
     real(8), allocatable, target :: x_error(:,:)
    
