@@ -28,15 +28,17 @@ contains
         class(bucket_t), intent(inout) :: this
         integer, intent(in)            :: n
         real(8), intent(in), optional  :: a, b
-        if (present(a) .and. present(b)) then
-            this%contents(n,1:this%high_water) = a*this%contents(n,1:this%high_water) + b
-        else if (present(a)) then
-            this%contents(n,1:this%high_water) = a*this%contents(n,1:this%high_water)
-        else if (present(b)) then
-            this%contents(n,1:this%high_water) = this%contents(n,1:this%high_water) + b
-        else
-            ! Do nothing
-        end if
+        associate (r => this%contents(n,1:this%high_water))
+            if (present(a) .and. present(b)) then
+                r = a*r + b
+            else if (present(a)) then
+                r = a*r
+            else if (present(b)) then
+                r = r + b
+            else
+                ! Do nothing
+            end if
+        end associate
     end subroutine apply_linear_transform_bucket
 
     module subroutine delete_bucket(this)
@@ -72,7 +74,7 @@ contains
         class(bucket_t), target, intent(in) :: this
         integer, intent(in)                 :: n
         real(8), pointer :: r(:)
-        r => this%contents(n,:)
+        r => this%contents(n,1:this%high_water)
     end function get_layer_contents_ref_bucket
     
     module pure logical function have_contents_bucket(this)

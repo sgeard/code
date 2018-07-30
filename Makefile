@@ -101,6 +101,9 @@ test_stl: stl.f90 $(ODIR)/libcode.a
 test_stats: stats.f90 archive $(ODIR)/libcode.a
 	$(F90) -o $@ $(F90_OPTS) -DTEST_STATS $< $(ODIR)/libcode.a
 
+test_bucket: bucket.f90 archive $(ODIR)/libcode.a
+	$(F90) -o $@ $(F90_OPTS) -DTEST_BUCKET $< $(ODIR)/libcode.a
+
 $(ARCH_NAME): $(ODIR)/libcode.so $(ODIR)/libcode.a
 	tar czvf $@ $(ODIR)/libcode.so $(ODIR)/libcode.a $(ODIR)/*.mod
 

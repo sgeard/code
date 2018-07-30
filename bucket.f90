@@ -98,3 +98,46 @@ module bucket
        
 end module bucket
 
+#ifdef TEST_BUCKET
+program bucket_test
+    use bucket
+    type(bucket_t), target :: b
+    real(8), pointer       :: r(:), s(:,:)
+
+    write(*,fmt='(a)', advance='no') 'Testing create ... '
+    call b%create(-5,2)
+    s => b%get_contents_ref()
+    if (any(shape(s) /= [2,0]) .or. b%number_of_items() /= 0) then
+        write(*,*) shape(s)
+        stop '***Failed'
+    end if
+    write(*,'(a)') 'passed.'
+    
+    write(*,fmt='(a)', advance='no') 'Testing add ... '
+    call b%add([1.0d0,2.0d0])
+    call b%add([-3.0d0,4.0d0])
+    call b%add([-2.0d0,1.0d0])
+    r => b%get_contents_ref(1)
+    if (size(r) /= 3) then
+        stop '***Failed'
+    end if
+    if (r(1) /= 1.0d0 .or. r(2) /= -3.0d0 .or. r(3) /= -2.0d0) then
+        stop '***Failed'
+    end if
+    r => b%get_contents_ref(2)
+    if (r(1) /= 2.0d0 .or. r(2) /= 4.0d0 .or. r(3) /= 1.0d0) then
+        stop '***Failed'
+    end if
+    write(*,'(a)') 'passed.'
+
+    write(*,fmt='(a)', advance='no') 'Testing apply_linear_transform ... '
+    call b%apply_linear_transform(1, a=2.0d0, b=3.0d0)
+    r => b%get_contents_ref(1)
+    if (r(1) /= 5.0d0 .or. r(2) /= -3.0d0 .or. r(3) /= -1.0d0) then
+        stop '***Failed'
+    end if
+    write(*,'(a)') 'passed.'
+   
+    
+end program bucket_test
+#endif
