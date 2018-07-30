@@ -13,7 +13,7 @@ ifdef intel
     ifdef release
         F90_OPTS_EXTRA := #-fp-model precise -fprotect-parens -xHost -prec-sqrt -qopenmp-simd -qopenmp -stand f08
         F90_OPTS += -O3 $(F90_OPTS_EXTRA) -warn all
-        ARCH_NAME := build-intel.tgz
+        ARCH_NAME := build-intel-release.tgz
     else
         F90_OPTS += -D_DEBUG -g -check bounds -warn all -debug-parameters used -traceback
         ARCH_NAME := build-intel-debug.tgz
