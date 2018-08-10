@@ -45,7 +45,6 @@ contains
         class(bucket_t), intent(inout) :: this
         logical :: file_exists
         integer :: u
-        integer :: bucket_shape(2)
         if (this%is_real_bucket) then
             inquire(file=this%file_name, exist=file_exists)
             if (file_exists) then
@@ -53,7 +52,6 @@ contains
                 close(u,status='delete')
             end if
         end if
-        bucket_shape = shape(this%contents)
         deallocate(this%contents)
         this%high_water = 0
         this%contents_written = .false.
@@ -96,7 +94,13 @@ contains
             stop '***Error: row_size must be a positive integer'
         end if
         this%is_real_bucket = (capacity > 0)
+        if (allocated(this%contents)) then
+            deallocate(this%contents)
+            this%high_water = 0
+            this%contents_written = .false.
+        end if
         allocate(this%contents(row_size, abs(capacity)))
+        
         if (present(fname)) then
             this%file_name = fname
         else
@@ -106,7 +110,7 @@ contains
         end if
         if (present(no_delete)) then
             if (no_delete) then
-                this%contents_written = .true.
+                this%contents_written = .true.  ! Allows adding to an existing file
             end if
         end if
     end subroutine initialize_bucket
