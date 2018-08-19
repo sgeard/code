@@ -25,7 +25,7 @@ else
     F90_OPTS := -c -fPIC -cpp -std=f2008 -fimplicit-none -DUSE_AUTODIFF -ffree-line-length-200 -Wall -Wextra -J$(ODIR)
     ifdef release
         F90_OPTS += -O3
-        ARCH_NAME := build-gfortran.tgz
+        ARCH_NAME := build-gfortran-release.tgz
     else
         F90_OPTS += -D_DEBUG -W -ggdb -fbounds-check -ffpe-trap=denormal,invalid
         ARCH_NAME := build-gfortran-debug.tgz
