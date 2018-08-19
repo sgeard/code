@@ -65,7 +65,32 @@ contains
         endif
     end subroutine create_plot
     
-    
+    module subroutine write_contour_plot(this)
+        class(contour_plot_t), intent(inout) :: this
+        integer                       :: u
+        character(len=:), allocatable :: fstem
+        if (.not. allocated(this%contour_function)) then
+            return
+        end if
+        open (newunit=u,file=this%gfile,access='sequential',status='replace')
+        write(u,'(a)') 'f(x,y) = '//this%contour_function
+        write(u,'(a)') 'isosample 250, 250'
+        write(u,'(a)') 'set contour base'
+        write(u,'(a)') 'set cntrparam level incremental -3, 0.5, 3'
+        write(u,'(a)') 'unset surface'
+        write(u,'(a)') "set table 'tmp.dat'"
+        write(u,'(a)') 'splot f(x,y)'
+        write(u,'(a)') 'unset table'
+        write (u,'(a)') 'set term png truecolor'
+        fstem = this%gfile(1:len(this%gfile)-3)
+        write (u,'(a)') 'set output "'//fstem//'png'
+        write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
+        write(u,'(a)') "p 'tmp.dat' w l lt -1 lw 1.5"
+        close(u)
+        call this%create_plot(this%gfile)
+        
+    end subroutine write_contour_plot
+        
     module subroutine write_bar_plot(this, data_file, columns)
         class(bar_plot_t), intent(inout) :: this
         character(len=*), intent(in)     :: data_file

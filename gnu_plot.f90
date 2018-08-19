@@ -55,6 +55,12 @@ module gnu_plot
         procedure                     :: create_plot
     end type gplot_t
     
+    type, extends(gplot_t) :: contour_plot_t
+        character(len=:), allocatable :: contour_function
+    contains
+        procedure :: write => write_contour_plot  
+    end type contour_plot_t
+    
     type, extends(gplot_t) :: histogram
     contains
         procedure :: write => write_gpl_hist    
@@ -82,7 +88,12 @@ module gnu_plot
         procedure :: write => write_bar_plot
     end type bar_plot_t
     
+    
     interface
+    
+        module subroutine write_contour_plot(this)
+            class(contour_plot_t), intent(inout) :: this
+        end subroutine write_contour_plot
     
         module subroutine write_bar_plot(this, data_file, columns)
             class(bar_plot_t), intent(inout) :: this
