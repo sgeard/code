@@ -26,8 +26,9 @@ Implementation of automatic differentiation
 For building everything.
 
 ### Archives
-*Intel* archives are built using ifort version 17.0.4
-*Gfortran* archves are built using GNU Fortran (GCC) 8.1.0
+- *Intel* archives are built using ifort version 17.0.4
+- *Gfortran* archves are built using GNU Fortran (GCC) 8.1.0
+
 Each archive contains the following:
 
 * libcode.so
