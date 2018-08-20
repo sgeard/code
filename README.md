@@ -8,7 +8,6 @@ with dynamic memory management. The bucket can be virtual in which case it is ne
 ### solver.f90  
 ODE solver with FFT calculator. Originally from Numerical Recipes 77 and recast using the modern syntax. Includes implementations
 of classic O(4) Runge-Kutta, the 3/8 O(4) Runge-Kutta which has better error properties and the O(5/6) Cash-Karp which has error estimation.
-Also includes FFT.
 
 ### gnu_plot.f90
 Helper module for Fortran code wanting to create gnuplot plots: line, bar, scatter, histograms.
