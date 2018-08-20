@@ -1,7 +1,7 @@
 ## code
 
 ### bucket.f90
-The idea is that the calling code fills up the bucket by adding data (in the form of a real(8) array of rank 1) and
+The idea is that the calling code fills up the bucket by adding data (in the form of a real(8) array (of rank 1) and
 this bucket automatically flushes itself to a file when it's full, so the calling program doesn't need to concern itself
 with dynamic memory management. The bucket can be virtual in which case it is never automatically flushed.
 
