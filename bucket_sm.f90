@@ -151,7 +151,7 @@ contains
         class(bucket_t), intent(inout)  :: this
         integer :: i, k, u
         ! This does nothing if the bucket is virtual
-        if (this%is_real_bucket .and. this%high_water > 0) then
+        if (allocated(this%file_name) .and. this%high_water > 0) then
             if (this%contents_written) then
                 open(newunit=u, file=this%file_name, status='old', position='append')
             else
@@ -161,9 +161,9 @@ contains
                 write(u,'(*(es13.5))') (this%contents(i,k),i=1,size(this%contents,1))
             end do
             close(u,status='keep')
+            this%high_water = 0
             this%contents_written = .true.
         end if
-        this%high_water = 0
         return
     end subroutine empty_bucket
     
