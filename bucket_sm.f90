@@ -45,7 +45,7 @@ contains
         class(bucket_t), intent(inout) :: this
         logical :: file_exists
         integer :: u
-        if (this%is_real_bucket) then
+        if (allocated(this%file_name)) then
             inquire(file=this%file_name, exist=file_exists)
             if (file_exists) then
                 open(file=this%file_name,newunit=u)
