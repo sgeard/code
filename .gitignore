@@ -5,3 +5,4 @@ obj_intel_release/
 *.mod
 *.swp
 *.kate-swp
+a.out
