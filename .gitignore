@@ -1,0 +1,7 @@
+obj_gfortran_debug/
+obj_gfortran_release/
+obj_intel_debug/
+obj_intel_release/
+*.mod
+*.swp
+*.kate-swp

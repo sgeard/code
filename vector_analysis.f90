@@ -3,14 +3,14 @@
 ! grad, div, curl, del_squared
 
 module vector_analysis
-    use auto_diff
+    use AVD
     implicit none
-    
+
     abstract interface
         function f(p)
             import
-            type(auto_var) :: f
-            type(auto_var), intent(in) :: p(3)
+            type(avd_d1) :: f
+            type(avd_d1), intent(in) :: p(3)
         end function f
     end interface
     

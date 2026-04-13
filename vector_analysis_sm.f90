@@ -8,13 +8,16 @@ contains
         real(8) :: r(3)
         real(8), intent(in) :: p(3)
         procedure(f)        :: phi
-        type(auto_var) :: q(3), s
-        integer        :: i
-                
+        type(avd_d1) :: q(3), s
+        integer      :: i, j
+
         do i=1,3
-            call make_var(p, q, i)
+            do j=1,3
+                q(j)%v  = p(j)
+                q(j)%d1 = merge(1.0d0, 0.0d0, j==i)
+            end do
             s = phi(q)
-            r(i) = s%get_derivative()
+            r(i) = s%d1
         end do
         
     end function grad
@@ -83,15 +86,15 @@ contains
         real(8) :: evaluate
         real(8), intent(in) :: p(3)
         procedure(f)        :: phi
-        type(auto_var) :: q(3), ra
-        integer :: i
-        
-        ! Make parameters constant - no derivatives
+        type(avd_d1) :: q(3), ra
+        integer      :: i
+
         do i=1,3
-            call q(i)%set_constant(p(i))
+            q(i)%v  = p(i)
+            q(i)%d1 = 0.0d0
         end do
         ra = phi(q)
-        evaluate = ra%get_value()
+        evaluate = ra%v
     end function evaluate
 
     ! Cross product of two vectors

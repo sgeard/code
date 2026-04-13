@@ -36,7 +36,7 @@ contains
         ! Calculate the range of data in 'col' for each bin
         max_col = maxval(col_data)
         min_col = minval(col_data)
-        if (max_col == min_col) then
+        if (abs(max_col - min_col) < epsilon(max_col)) then
             max_col = max_col + 0.5d0
             min_col = min_col - 0.5d0
         end if
@@ -212,7 +212,7 @@ contains
         iseed1 = 40014*(iseed1-i1*53668)-i1*12211
 
         if (iseed1 < 0) then
-            iseed2 = iseed1+2147483563
+            iseed1 = iseed1+2147483563
         end if
  
         i2 = iseed2/52774

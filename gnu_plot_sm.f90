@@ -52,7 +52,7 @@ contains
         call execute_command_line(command,cmdstat=cstat,cmdmsg=cmsg,exitstat=estat)
         if (cstat /= 0) then
             write(*,*) cmsg
-            stop '***Error: plot command failed'
+            stop '***Error: gnuplot command failed, is it installed?'
         end if
         if (estat /= 0) then
             write(*,'(a,i0)') command//': status = ',estat
@@ -83,7 +83,7 @@ contains
         write(u,'(a)') 'unset table'
         write (u,'(a)') 'set term png truecolor'
         fstem = this%gfile(1:len(this%gfile)-3)
-        write (u,'(a)') 'set output "'//fstem//'png'
+        write (u,'(a)') 'set output "'//fstem//'png"'
         write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
         write(u,'(a)') "p 'tmp.dat' w l lt -1 lw 1.5"
         close(u)
@@ -114,7 +114,7 @@ contains
         write (u,'(a)') 'set boxwidth 1 relative'
         write (u,'(a)') 'set term png truecolor'
         fstem = this%gfile(1:len(this%gfile)-3)
-        write (u,'(a)') 'set output "'//fstem//'png'
+        write (u,'(a)') 'set output "'//fstem//'png"'
         write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
         write (u,'(a)') 'set xtics rotate 90'
         if (this%hide_x_labels) then
@@ -155,7 +155,7 @@ contains
         write (u,'(a)') 'set boxwidth 1 relative'
         write (u,'(a)') 'set term png truecolor'
         fstem = this%gfile(1:len(this%gfile)-3)
-        write (u,'(a)') 'set output "'//fstem//'png'
+        write (u,'(a)') 'set output "'//fstem//'png"'
         write (u,'(a)') 'set style fill transparent solid 0.5 noborder'
         write (u,'(a)') 'set xtics rotate 90'
         if (present(ymax)) then
