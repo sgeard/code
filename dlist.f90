@@ -19,7 +19,7 @@ module dlist
 
     ! Data type from which to inherit to create a data node.
     ! No methods required — storage uses polymorphic assignment (=).
-    type :: dlist_node_data_t
+    type, abstract :: dlist_node_data_t
     end type dlist_node_data_t
 
     type, extends(dlist_node_data_t) :: dlist_node_integer
