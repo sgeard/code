@@ -6,3 +6,4 @@ obj_intel_release/
 *.swp
 *.kate-swp
 a.out
+.svnignore

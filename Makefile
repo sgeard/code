@@ -45,7 +45,7 @@ all_archives:
 	$(MAKE) intel=t
 	$(MAKE) intel=t release=t
 
-SRC := avd.f90 avd_sm.f90 clib.f90 bucket_sm.f90 gnu_plot.f90 solver.f90 solver_sm.f90 stats_sm.f90 vector_analysis.f90 bucket.f90 gnu_plot_sm.f90 stats.f90 vector_analysis_sm.f90 trace.f90
+SRC := avd.f90 avd_sm.f90 clib.f90 bucket_sm.f90 gnu_plot.f90 solver.f90 solver_sm.f90 stats_sm.f90 vector_analysis.f90 bucket.f90 gnu_plot_sm.f90 stats.f90 vector_analysis_sm.f90 trace.f90 dlist.f90 dlist_sm.f90
 OBJ := ${SRC:%.f90=$(ODIR)/%.o}
 
 PLANETS_SRC := avd.f90 avd_sm.f90 clib.f90 vector_analysis.f90 vector_analysis_sm.f90 solver.f90 solver_sm.f90 gnu_plot.f90 gnu_plot_sm.f90 stats.f90 stats_sm.f90 bucket.f90 bucket_sm.f90
@@ -131,25 +131,31 @@ $(ODIR)/gnu_plot.o: gnu_plot.f90
 $(ODIR)/gnu_plot_sm.o: gnu_plot_sm.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
 
+$(ODIR)/dlist.o: dlist.f90
+	$(F90) $(F90_OPTS) -c $< -o $@
+
+$(ODIR)/dlist_sm.o: dlist_sm.f90
+	$(F90) $(F90_OPTS) -c $< -o $@
+
 archive: $(ARCH_NAME)
 
-test_stl: stl.f90 $(ODIR)/libcode.a
+test_stl: $(ODIR) stl.f90 $(ODIR)/libcode.a
 	$(F90) -o $@ $(F90_OPTS) -DTEST_STL $< $(ODIR)/libcode.a
 
-test_stats: stats.f90 archive $(ODIR)/libcode.a
+test_stats: $(ODIR) stats.f90 archive $(ODIR)/libcode.a
 	$(F90) -o $@ $(F90_OPTS) -DTEST_STATS $< $(ODIR)/libcode.a
 
-test_bucket: bucket.f90 archive $(ODIR)/libcode.a
+test_bucket: $(ODIR) bucket.f90 archive $(ODIR)/libcode.a
 	$(F90) -o $@ $(F90_OPTS) -DTEST_BUCKET $< $(ODIR)/libcode.a
+
+utest_dlist: $(ODIR) utest_dlist.f90 $(ODIR)/libcode.a
+	$(F90) -o $@ $(F90_OPTS) utest_dlist.f90 $(ODIR)/libcode.a
 
 $(ARCH_NAME): $(ODIR)/libcode.so $(ODIR)/libcode.a
 	tar czvf $@ $(ODIR)/libcode.so $(ODIR)/libcode.a $(ODIR)/*.mod
-
-utest: auto_d.hxx utest.cxx Makefile
-	/usr/local/bin/g++ -o utest -ggdb utest.cxx -Wall
 	
 clean:
-	@rm -vrf $(ODIR) *~ $(ARCH_NAME) test_stats $(EXTRA_EXES)
+	@rm -vrf $(ODIR) *~ $(ARCH_NAME) test_stats $(EXTRA_EXES) *.mod
     
 clean_all_archives:
 	$(MAKE) clean
