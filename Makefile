@@ -134,7 +134,7 @@ $(ODIR)/gnu_plot_sm.o: gnu_plot_sm.f90
 $(ODIR)/dlist.o: dlist.f90
 	$(F90) $(F90_OPTS) -c $< -o $@
 
-$(ODIR)/dlist_sm.o: dlist_sm.f90
+$(ODIR)/dlist_sm.o: dlist_sm.f90 $(ODIR)/dlist.mod
 	$(F90) $(F90_OPTS) -c $< -o $@
 
 archive: $(ARCH_NAME)

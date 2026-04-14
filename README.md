@@ -27,6 +27,9 @@ grad, div, curl, div grad using autodiff
 ### autodiff.f90
 Implementation of automatic differentiation
 
+### dlist.f90
+Doubly linked-list
+
 ## Makefile
 For building everything.
 
